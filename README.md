@@ -1,4 +1,5 @@
 # Kelvin Stardate Converter  
+
 *(CLI + Library, Multiple Timelines, Mild Exhaustion)*
 
 This is a **Kelvin Timeline–compatible stardate ⟷ Earth date converter**, written in Python, with both:
@@ -7,6 +8,7 @@ This is a **Kelvin Timeline–compatible stardate ⟷ Earth date converter**, wr
 - a **scriptable CLI / importable library**  
 
 It exists because:
+
 1. Stardates are fake,
 2. Some people pretend they aren’t,
 3. I got tired of hand-waving calendar math across timelines, and
@@ -251,6 +253,7 @@ Running tests requires `pytest` to be installed
 │   └── LICENSE
 ├── requirements.txt            # Runtime + test dependencies
 ├── .gitignore                  # Aggressively preventative
+├── SETUP_FOR_DUMMIES.md 
 ├── README.md                   # You are here
 └── LICENSE
 ```
@@ -284,6 +287,7 @@ Short version:
 - Canon-reference data support
 
 Long version lives in [`TODO.md`](./TODO.md), which tracks:
+
 - immediate fixes
 - packaging plans
 - UX improvements
@@ -321,7 +325,6 @@ This repository contains **both original code and reference material**, which ar
 
 This project is not affiliated with, endorsed by, or claiming authority over
 official Star Trek canon.
-
 
 ---
 
