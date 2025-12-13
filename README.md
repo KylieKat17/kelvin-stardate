@@ -236,14 +236,21 @@ Running tests requires `pytest` to be installed
 
 ```text
 .
-├── kelvin_stardate.py          # Core conversion logic (the math nobody agrees on)
-├── kelvin_stardate_cli.py      # CLI, interactive menu, argument parsing, output
-├── kelvin_errors.py            # Custom exception + error codes
-├── kelvin_help.py              # Help text & redisplay loop
-├── test_kelvin_stardate.py     # Test stuff, duh. Don't wanna do that shit by hand
+├── kelvin_stardate.py            # Core conversion logic (the math nobody agrees on)
+├── kelvin_stardate_cli.py        # CLI, interactive menu, argument parsing, output
+├── kelvin_errors.py              # Custom exception + error codes
+├── kelvin_help.py                # Help text & redisplay loop
+├── tests/                        # Test stuff, duh. Don't wanna do that shit by hand
+│   └── test_kelvin_stardate.py
+├── references/
+│   ├── canon_dates.yaml          # might be implemented in future
+│   ├── scripts/                  # movie scripts I used for reference when checking dates
+│   ├── source_notes.md           # might be added later
+│   └── LICENSE
 ├── requirements.txt            # Runtime + test dependencies
 ├── .gitignore                  # Aggressively preventative
-└── README.md                   # You are here
+├── README.md                   # You are here
+└── LICENSE
 ```
 
 ---
@@ -271,10 +278,22 @@ No, I don’t regret that.
 
 ---
 
-## License
+## Licensing & Usage Notes
 
-MIT License.
-Use it, fork it, improve it, or ignore it until you rediscover it at 2 a.m.
+This repository contains **both original code and reference material**, which are licensed differently.
+
+- **Code** (all `.py` files, CLI, tests) is licensed under  
+  **Creative Commons Attribution–NonCommercial 4.0 (CC BY-NC 4.0)**  
+  → Non-commercial use only; attribution required.
+
+- **Reference material** (everything under `/references`) is licensed under  
+  **Creative Commons Attribution–NonCommercial–ShareAlike 4.0 (CC BY-NC-SA 4.0)**  
+  → Non-commercial use only; attribution required; derivatives must use the same license.  
+  → Reference data may not be redistributed independently of this project.
+
+This project is not affiliated with, endorsed by, or claiming authority over
+official Star Trek canon.
+
 
 ---
 
