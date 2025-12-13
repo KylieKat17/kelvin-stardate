@@ -269,6 +269,32 @@ No, I don’t regret that.
 
 ---
 
+## Roadmap
+
+This project is stable and usable as-is, but there are several planned improvements
+and expansions, ranging from quality-of-life fixes to larger structural changes.
+
+Short version:
+
+- CLI polish and internal cleanup
+- Proper packaging and distribution
+- Better output options and documentation
+- Canon-reference data support
+
+Long version lives in [`TODO.md`](./TODO.md), which tracks:
+- immediate fixes
+- packaging plans
+- UX improvements
+- canon data handling
+- and whatever else Future Me decides is necessary
+
+Nothing here is time-bound.
+Some of it will happen soon.
+Some of it will happen when I feel like it.
+That is intentional.
+
+---
+
 ## Known Limitations
 
 - This does **not** attempt to reconcile Prime Timeline stardates (sorry, there are already tools for that. Go check one of them!)
