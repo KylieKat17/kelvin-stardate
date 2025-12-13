@@ -8,7 +8,7 @@ This is a **Kelvin Timeline–compatible stardate ⟷ Earth date converter**, wr
 
 It exists because:
 1. Stardates are fake,
-2. Everyone pretends they aren’t,
+2. Some people pretend they aren’t,
 3. I got tired of hand-waving calendar math across timelines, and
 4. Nobody else open-sourced one that does the canonical conversion for the reboot movies.
 
