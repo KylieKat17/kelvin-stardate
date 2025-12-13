@@ -51,6 +51,8 @@ Install dependencies with:
 pip install -r requirements.txt
 ````
 
+New to Python or the command line? See [`SETUP_FOR_DUMMIES.md`](./SETUP_FOR_DUMMIES.md)
+
 ### Python Dependencies
 
 Dependencies are intentionally minimal and explicit:
@@ -219,7 +221,7 @@ They use a continuous-year model and do not pretend leap days are clean.
 
 ## Running Tests
 
-Tests are written using `pytest`.
+Tests are written using `pytest`
 
 To run the full test suite:
 
