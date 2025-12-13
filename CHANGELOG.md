@@ -19,6 +19,7 @@ See `TODO.md` for details.
 - Packaging work (`pyproject.toml`, pip installability)
 - Canon date references (likely YAML-backed)
 - Output formatting improvements (tables, styling cleanup)
+- Project Wide color usage in a `kelvin-color.py` file so I don't have to add it at the top of every file!
 - CHANGELOG exists now, so future entries will be cleaner
 
 ---
