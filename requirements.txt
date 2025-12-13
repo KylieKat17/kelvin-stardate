@@ -1,0 +1,14 @@
+# ============================================================
+# Kelvin Stardate Converter – Dependencies
+# ============================================================
+# This file includes:
+#   - runtime dependencies
+#   - test dependencies
+#   - one planned future dependency (PyYAML)
+#
+# See README.md for details
+# ============================================================
+
+colorama>=0.4.6
+pytest>=9.0.0
+PyYAML>=6.0

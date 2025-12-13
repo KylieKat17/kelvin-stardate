@@ -8,8 +8,8 @@ This is a **Kelvin Timeline–compatible stardate ⟷ Earth date converter**, wr
 
 It exists because:
 1. Stardates are fake,
-2. Everyone pretends they aren’t, and
-3. I got tired of hand-waving calendar math across timelines.
+2. Everyone pretends they aren’t,
+3. I got tired of hand-waving calendar math across timelines, and
 4. Nobody else open-sourced one that does the canonical conversion for the reboot movies.
 
 Also because I kept needing it.
@@ -43,15 +43,72 @@ The CLI color-codes output by mode so you can tell which timeline you’re in wi
 ## Requirements
 
 - **Python 3.9+**
-- One (1) external dependency:
+- `pip` (installed and not ancient)
+
+Install dependencies with:
 
 ```bash
 pip install -r requirements.txt
 ````
 
-Which installs:
+### Python Dependencies
 
-* `colorama` – for readable output that doesn’t look like a warp core breach in PowerShell
+Dependencies are intentionally minimal and explicit:
+
+| Package    | Purpose                                                                      |
+| ---------- | ---------------------------------------------------------------------------- |
+| `colorama` | Cross-platform terminal colors (especially required on Windows / PowerShell) |
+| `pytest`   | Required to run `test_kelvin_stardate.py`                                    |
+| `PyYAML`   | Planned future functionality (configuration / structured data support)       |
+
+Only `colorama` is required to *run the CLI*.
+`pytest` is only needed if you are running tests.
+
+---
+
+## Environment & System Information
+
+This project was developed and tested in a very specific environment.
+Other setups *should* work, but this is what I was working with:
+
+### Tested Environment
+
+- **Operating System:** Microsoft Windows 11 Pro
+  Version 10.0.26100 (Build 26100)
+- **Python:** CPython 3.13.9
+- **pip:** 25.2
+- **Architecture:** 64-bit (AMD64)
+- **Terminal:** PowerShell / Windows Terminal (dark mode)
+- **Locale:** en_US (cp1252)
+- **stdout encoding:** UTF-8
+
+CLI output (colors, spacing, box characters) was tuned for PowerShell and Windows Terminal.
+If your terminal ignores ANSI colors, output will still work, but will be less readable.
+
+### Python Version Notes
+
+- Developed and tested on **Python 3.13.9** (originally 3.9+ when I was still on the Windows store download)
+- Uses only standard library features and widely supported packages
+- Python ≥ 3.9 is required
+- Not tested on PyPy
+- Not tested on Python < 3.9
+
+If this fails on older Python versions, that is not a bug — upgrade Python.
+
+### pip Notes
+
+You should have `pip` installed and reasonably up to date.
+
+Recommended sanity check:
+
+```bash
+python -m pip install --upgrade pip
+```
+
+If `pip` is missing, install Python properly from
+[https://www.python.org/downloads/](https://www.python.org/downloads/)
+
+Do not attempt to duct-tape this with system Python from 2014.
 
 ---
 
@@ -71,12 +128,12 @@ python kelvin_stardate_cli.py
 
 You’ll get a menu-driven interface with:
 
-* mode selection
-* month name parsing (yes, you can type “September”)
-* leap-year validation
-* error codes
-* polite exits
-* and a banner that quietly implies too much lore knowledge
+- mode selection
+- month name parsing (yes, you can type “September”)
+- leap-year validation
+- error codes
+- polite exits
+- and a banner that quietly implies too much lore knowledge
 
 This is the “I just want an answer” mode.
 
@@ -97,6 +154,7 @@ python kelvin_stardate_cli.py sd-to 2258.42 --mode astronomical
 ```
 
 If you don’t specify a mode, it defaults to `no_leap`.
+*(And all mode flags do have pseudonyms. Because I'd rather type `a` or `astro` rather than `astronomical`, wouldn't you? Use -h for more info)*
 
 ---
 
@@ -116,18 +174,19 @@ python kelvin_stardate_cli.py --from-sd 2258.42
 
 If you give it *nothing*, it drops you back into interactive mode instead of yelling at you.
 
+---
 
 ## Output Behavior (On Purpose)
 
-* Inputs are always echoed at the top of results
-* Outputs include both **ISO dates** and **human-readable dates**
-* `all` mode prints a comparison block so you can see exactly how bad the divergence is
-* Errors use **coded messages** (`E001`, `E002`, etc.) because vague failure is worse than explicit failure
+- Inputs are always echoed at the top of results
+- Outputs include both **ISO dates** and **human-readable dates**
+- `all` mode prints a comparison block so you can see exactly how bad the divergence is
+- Errors use **coded messages** (`E001`, `E002`, etc.) because vague failure is worse than explicit failure
 
 The CLI also attempts to auto-detect whether a stardate looks:
 
-* Kelvin-style, or
-* Astronomical (long fractional component)
+- Kelvin-style, or
+- Astronomical (long fractional component)
 
 This is not magic. It is pattern recognition and vibes.
 
@@ -158,7 +217,22 @@ They use a continuous-year model and do not pretend leap days are clean.
 
 ---
 
-## Project Structure
+## Running Tests
+
+Tests are written using `pytest`.
+
+To run the full test suite:
+
+```bash
+pytest
+```
+
+Running tests requires `pytest` to be installed
+(see `requirements.txt`).
+
+---
+
+## Project Structure (at present)
 
 ```text
 .
@@ -166,7 +240,8 @@ They use a continuous-year model and do not pretend leap days are clean.
 ├── kelvin_stardate_cli.py      # CLI, interactive menu, argument parsing, output
 ├── kelvin_errors.py            # Custom exception + error codes
 ├── kelvin_help.py              # Help text & redisplay loop
-├── requirements.txt            # Minimal dependencies
+├── test_kelvin_stardate.py     # Test stuff, duh. Don't wanna do that shit by hand
+├── requirements.txt            # Runtime + test dependencies
 ├── .gitignore                  # Aggressively preventative
 └── README.md                   # You are here
 ```
@@ -175,11 +250,11 @@ They use a continuous-year model and do not pretend leap days are clean.
 
 ## Design Notes / Why This Is Like This
 
-* Stardates are **not canonically defined**, so pretending there’s One True Formula is dishonest.
-* This tool makes the assumptions explicit and lets you choose.
-* The Kelvin Timeline uses **ordinal thinking**, not Earth calendar purity.
-* Astronomical mode exists because sometimes you want math, not vibes.
-* `all` mode exists because sometimes you want to *see the timeline fracture*.
+- Stardates are **not canonically defined**, so pretending there’s One True Formula is dishonest.
+- This tool makes the assumptions explicit and lets you choose.
+- The Kelvin Timeline uses **ordinal thinking**, not Earth calendar purity.
+- Astronomical mode exists because sometimes you want math, not vibes.
+- `all` mode exists because sometimes you want to *see the timeline fracture*.
 
 Also:
 Yes, this CLI is more defensive than strictly necessary.
@@ -189,10 +264,10 @@ No, I don’t regret that.
 
 ## Known Limitations
 
-* This does **not** attempt to reconcile Prime Timeline stardates.
-* This does **not** handle BCE dates.
-* This will not stop you from creating paradoxes.
-* The universe will not thank you.
+- This does **not** attempt to reconcile Prime Timeline stardates (sorry, there are already tools for that. Go check one of them!)
+- This does **not** handle BCE dates (...why would you want that anyway? I don't see Jesus walking around on camera, do you?)
+- This will not stop you from creating paradoxes.
+- The universe will not thank you.
 
 ---
 
@@ -206,10 +281,10 @@ Use it, fork it, improve it, or ignore it until you rediscover it at 2 a.m.
 ## Final Note
 
 This started as “I just need a quick converter” and became
-“well, *now* it needs modes, error codes, and an interactive menu.”
+“well, *now* it needs modes, error codes, command line flags, and an interactive menu.”
 
 If you’re reading this because you found the repo:
 hello, welcome, I hope this saves you time.
 
 If you’re reading this because you’re me, later:
-yes, this was the correct amount of effort
+yes, this was the correct amount of effort.
