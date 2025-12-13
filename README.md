@@ -167,7 +167,7 @@ If you don’t specify a mode, it defaults to `no_leap`.
 Earth date → Stardate:
 
 ```bash
-python kelvin_stardate_cli.py --from-earth 2258-04-17 --mode all
+python kelvin_stardate_cli.py --from-earth 2258 04 17 --mode all
 ```
 
 Stardate → Earth date:
