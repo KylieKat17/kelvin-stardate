@@ -3,7 +3,7 @@
 import argparse
 from datetime import date
 
-#
+# imports!
 from kelvin_stardate import (
     earth_to_stardate,
     stardate_to_earth,

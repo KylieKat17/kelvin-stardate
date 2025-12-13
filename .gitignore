@@ -83,6 +83,8 @@ dist/                # things meant to be shipped elsewhere
 *.pem                # certificates do not belong in Git
 *.key
 *.crt
+*/old
+*/working_fully_v1.1
 
 # ===========================
 # 🚫 Executables & Compiled Binaries
