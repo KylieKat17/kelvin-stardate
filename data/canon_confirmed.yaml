@@ -1,0 +1,14 @@
+characters:
+  kirk:
+    id: kirk
+    name: James T. Kirk
+    species: human
+    birth:
+      earth_date: '2233-01-04'
+      confidence: canon
+      source: Star Trek (2009)
+      stardate_kelvin: 2233.04
+      source_type: film
+    nicknames:
+    - Jim
+    - Kirk
