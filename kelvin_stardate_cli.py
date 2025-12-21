@@ -18,6 +18,8 @@ from kelvin_help import help_loop
 # UPDATING TO GLOBALLIZED IMPORTS
 from kelvin_colors import COLORS, c, reset
 
+# For header output width
+RESULT_WIDTH = 68
 
 # ============================================================
 # MONTH NAME LOOKUP
@@ -148,15 +150,19 @@ def detect_stardate_type(sd: str):
     return "astronomical" if len(frac) >= 4 else "kelvin"
 
 # TODO: MAKE SURE ==== IS UNIFORM REGARDLESS OF RESULT TYPE
+
 # ============================================================
 # RESULT PRINTER (Unified print block for single-mode)
 # ============================================================
 def print_single_result(label: str, earth_date=None, stardate=None, input_earth=None, input_sd=None):
     color = COLORS.get(label.lower(), c("header"))
 
-    print("\n ====================== ", end="")
-    print(f"{color}RESULT ({label.upper()}){reset()}", end="")
-    print(" ======================")
+    title = f"RESULT ({label.upper()})"
+    border = "=" * RESULT_WIDTH
+
+    print(f"\n {border}")
+    print(f" {color}{title.center(RESULT_WIDTH)}{reset()}")
+    print(f" {border}")
 
     # Always show input at the top
     if input_earth is not None:
@@ -173,7 +179,8 @@ def print_single_result(label: str, earth_date=None, stardate=None, input_earth=
     if earth_date is not None:
         print(f"   Earth date   :  {earth_date}  ({earth_date.strftime('%B %d, %Y')})")
 
-    print(" =================================================================\n")
+    print(f" {border}\n")
+
 
 # ============================================================
 # EARTH --> STARDATE WRAPPER
@@ -191,9 +198,12 @@ def do_earth_to_stardate(y, m, d, mode):
         sd_gr   = earth_to_stardate(dt, "gregorian")
         sd_astr = earth_to_stardate_astronomical(dt)
 
-        print("\n ====================== ", end="")
-        print(f"{c('all')}RESULTS (ALL MODES){reset()}", end="")
-        print(" ======================")
+        title = "RESULTS (ALL MODES)"
+        border = "=" * RESULT_WIDTH
+
+        print(f"\n {border}")
+        print(f" {c('all')}{title.center(RESULT_WIDTH)}{reset()}")
+        print(f" {border}")
 
         # Show input Earth date at top
         print(f"   {c('label')}Earth date{reset()}          :  {dt}  ({dt.strftime('%B %d, %Y')})\n")
@@ -203,7 +213,7 @@ def do_earth_to_stardate(y, m, d, mode):
         print(f"   {c('gregorian')}Kelvin (gregorian){reset()}  :  {sd_gr}")
         print(f"   {c('astronomical')}Astronomical{reset()}        :  {sd_astr}")
 
-        print(" =================================================================\n")
+        print(f" {border}\n")
         return
 
     # ---- SINGLE MODE ----
@@ -225,9 +235,13 @@ def do_stardate_to_earth(sd_str, mode):
 
     # ---- ALL MODE ----
     if mode == "all":
-        print("\n ====================== ", end="")
-        print(f"{c('all')}RESULTS (ALL MODES){reset()}", end="")
-        print(" ======================")
+        
+        title = "RESULTS (ALL MODES)"
+        border = "=" * RESULT_WIDTH
+
+        print(f"\n {border}")
+        print(f" {c('all')}{title.center(RESULT_WIDTH)}{reset()}")
+        print(f" {border}")
 
         # Show input stardate
         print(f"   {c('label')}Stardate{reset()}            :  {sd_str}\n")
@@ -256,7 +270,7 @@ def do_stardate_to_earth(sd_str, mode):
         except (ValueError, StardateError, StardateCLIError):
             print(f"   {c('error')}Astronomical: ERROR{reset()}")
 
-        print(" =================================================================\n")
+        print(f" {border}\n")
         return
 
     # --- SINGLE MODE ---
