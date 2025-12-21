@@ -60,7 +60,7 @@ def check_user_input(value: str):
 
     # Quit
     if stripped in ("q", "/q", "quit", "exit"):
-        print(f"{c('info')}Goodbye!{reset()}")
+        print(f"\n{c('info')}Goodbye!{reset()}\n")
         raise SystemExit
 
     # Help
@@ -147,7 +147,7 @@ def detect_stardate_type(sd: str):
 
     return "astronomical" if len(frac) >= 4 else "kelvin"
 
-# TODO: add redisplay of both earth and stardate on output ??? CHECK IF IMPLEMENTED
+# TODO: MAKE SURE ==== IS UNIFORM REGARDLESS OF RESULT TYPE
 # ============================================================
 # RESULT PRINTER (Unified print block for single-mode)
 # ============================================================
@@ -371,10 +371,10 @@ def interactive_menu():
 
         # MODE MENU
         print("\n Leap Year / Fractional Mode:")
-        print("   1) no_leap       (Orci-style 1..365)")
-        print("   2) gregorian     (true leap-year handling)")
-        print("   3) astronomical  (365.2425 day year)")
-        print("   4) all           (display all modes)")
+        print(f"   1) {c('no_leap')}no_leap{reset()}       (Orci-style 1..365)")
+        print(f"   2) {c('gregorian')}gregorian{reset()}     (true leap-year handling)")
+        print(f"   3) {c('astronomical')}astronomical{reset()}  (365.2425 day year)")
+        print(f"   4) {c('all')}all{reset()}           (display all modes)")
         print("------------------------------------------------------------")
 
         try:
@@ -435,7 +435,7 @@ def interactive_menu():
             continue
 
         if again.strip().lower() != "y":
-            print(f"{c('info')}Goodbye!{reset()}\n")
+            print(f"\n{c('info')}Goodbye!{reset()}\n")
             break
 
 
