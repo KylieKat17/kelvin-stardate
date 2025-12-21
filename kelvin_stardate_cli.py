@@ -15,20 +15,9 @@ from kelvin_stardate import (
 from kelvin_errors import StardateCLIError
 from kelvin_help import help_loop
 
-from colorama import Fore, Style, init
+# UPDATING TO GLOBALLIZED IMPORTS
+from kelvin_colors import COLORS, c, reset
 
-# Initialize colorama
-init(autoreset=True)
-
-# ============================================================
-# GLOBAL COLORS (Softer, readable color palette for PowerShell Dark Mode)
-# ============================================================
-MODE_COLORS = {
-    "all": Fore.LIGHTYELLOW_EX,
-    "no_leap": Fore.LIGHTBLUE_EX,
-    "gregorian": Fore.LIGHTCYAN_EX,
-    "astronomical": Fore.LIGHTGREEN_EX,
-}
 
 # ============================================================
 # MONTH NAME LOOKUP
@@ -65,13 +54,13 @@ class ContinuePrompt(Exception):
 def check_user_input(value: str):
     """Resolves q/quit + help/h and empty errors."""
     if value is None:
-        raise StardateCLIError("E007", "Empty input.")
+        raise StardateCLIError("E001", "Empty input.")
 
     stripped = value.strip().lower()
 
     # Quit
     if stripped in ("q", "/q", "quit", "exit"):
-        print(f"\n{Fore.CYAN}Goodbye!{Style.RESET_ALL}\n")
+        print(f"{c('info')}Goodbye!{reset()}")
         raise SystemExit
 
     # Help
@@ -81,7 +70,7 @@ def check_user_input(value: str):
 
     # Empty string
     if stripped == "":
-        raise StardateCLIError("E007", "Input cannot be empty.")
+        raise StardateCLIError("E001", "Input cannot be empty.")
 
     return value
 
@@ -100,9 +89,9 @@ def parse_month(value: str) -> int:
         m = int(raw_month_v)
         if 1 <= m <= 12:
             return m
-        raise StardateCLIError("E001", f"Invalid numeric month '{raw_month_v}'")
+        raise StardateCLIError("E002", f"Invalid numeric month '{raw_month_v}'")
 
-    raise StardateCLIError("E001", f"Unrecognized month '{value}'")
+    raise StardateCLIError("E002", f"Unrecognized month '{value}'")
 
 
 def parse_day(value: str) -> int:
@@ -140,7 +129,7 @@ def normalize_mode(mode):
         return "astronomical"
     if mode in ("4", "all", "a"):
         return "all"
-    raise StardateCLIError("E008", f"Unknown mode '{mode}'")
+    raise StardateCLIError("E006", f"Unknown mode '{mode}'")
 
 
 # ============================================================
@@ -163,11 +152,10 @@ def detect_stardate_type(sd: str):
 # RESULT PRINTER (Unified print block for single-mode)
 # ============================================================
 def print_single_result(label: str, earth_date=None, stardate=None, input_earth=None, input_sd=None):
-    color = MODE_COLORS.get(label.lower(), Fore.WHITE)
-    # label_upper = label.upper()
+    color = COLORS.get(label.lower(), c("header"))
 
     print("\n ====================== ", end="")
-    print(f"{color}RESULT ({label.upper()}){Style.RESET_ALL}", end="")
+    print(f"{color}RESULT ({label.upper()}){reset()}", end="")
     print(" ======================")
 
     # Always show input at the top
@@ -187,9 +175,8 @@ def print_single_result(label: str, earth_date=None, stardate=None, input_earth=
 
     print(" =================================================================\n")
 
-
 # ============================================================
-# EARTH → STARDATE WRAPPER
+# EARTH --> STARDATE WRAPPER
 # ============================================================
 
 def do_earth_to_stardate(y, m, d, mode):
@@ -205,16 +192,16 @@ def do_earth_to_stardate(y, m, d, mode):
         sd_astr = earth_to_stardate_astronomical(dt)
 
         print("\n ====================== ", end="")
-        print(f"{MODE_COLORS['all']}RESULTS (ALL MODES){Style.RESET_ALL}", end = "")
+        print(f"{c('all')}RESULTS (ALL MODES){reset()}", end="")
         print(" ======================")
 
         # Show input Earth date at top
-        print(f"   {Fore.YELLOW}Earth date{Style.RESET_ALL}          :  {dt}  ({dt.strftime('%B %d, %Y')})\n")
+        print(f"   {c('label')}Earth date{reset()}          :  {dt}  ({dt.strftime('%B %d, %Y')})\n")
 
-        # Individual mode outputs (cyan for Kelvins, green for astronomical)
-        print(f"   {Fore.CYAN}Kelvin (no_leap){Style.RESET_ALL}    :  {sd_nl}")
-        print(f"   {Fore.CYAN}Kelvin (gregorian){Style.RESET_ALL}  :  {sd_gr}")
-        print(f"   {Fore.GREEN}Astronomical{Style.RESET_ALL}        :  {sd_astr}")
+        # Individual mode outputs
+        print(f"   {c('no_leap')}Kelvin (no_leap){reset()}    :  {sd_nl}")
+        print(f"   {c('gregorian')}Kelvin (gregorian){reset()}  :  {sd_gr}")
+        print(f"   {c('astronomical')}Astronomical{reset()}        :  {sd_astr}")
 
         print(" =================================================================\n")
         return
@@ -229,7 +216,7 @@ def do_earth_to_stardate(y, m, d, mode):
 
 
 # ============================================================
-# STARDATE → EARTH WRAPPER (CLI & INTERACTIVE)
+# STARDATE --> EARTH WRAPPER (CLI & INTERACTIVE)
 # ============================================================
 
 def do_stardate_to_earth(sd_str, mode):
@@ -239,36 +226,35 @@ def do_stardate_to_earth(sd_str, mode):
     # ---- ALL MODE ----
     if mode == "all":
         print("\n ====================== ", end="")
-        print(f"{MODE_COLORS['all']}RESULTS (ALL MODES){Style.RESET_ALL}", end="")
+        print(f"{c('all')}RESULTS (ALL MODES){reset()}", end="")
         print(" ======================")
 
         # Show input stardate
-        print(f"   {Fore.YELLOW}Stardate{Style.RESET_ALL}            :  {sd_str}\n")
+        print(f"   {c('label')}Stardate{reset()}            :  {sd_str}\n")
 
-        # TODO: ADD ERROR CODES IN ERROR MESSAGES!!!!!!
         # no_leap
         try:
             dt_nl = stardate_to_earth(sd_str, "no_leap")
-            print(f"   {Fore.CYAN}Kelvin (no_leap){Style.RESET_ALL}    :  "
+            print(f"   {c('no_leap')}Kelvin (no_leap){reset()}    :  "
                   f"{dt_nl}  ({dt_nl.strftime('%B %d, %Y')})")
-        except Exception:
-            print(f"   {Fore.RED}Kelvin (no_leap): ERROR{Style.RESET_ALL}")
+        except (StardateError, ValueError):
+            print(f"   {c('error')}Kelvin (no_leap): ERROR{reset()}")
 
         # gregorian
         try:
             dt_gr = stardate_to_earth(sd_str, "gregorian")
-            print(f"   {Fore.CYAN}Kelvin (gregorian){Style.RESET_ALL}  :  "
+            print(f"   {c('gregorian')}Kelvin (gregorian){reset()}  :  "
                   f"{dt_gr}  ({dt_gr.strftime('%B %d, %Y')})")
-        except Exception:
-            print(f"   {Fore.RED}Kelvin (gregorian): ERROR{Style.RESET_ALL}")
+        except (StardateError, ValueError):
+            print(f"   {c('error')}Kelvin (gregorian): ERROR{reset()}")
 
         # astronomical
         try:
             dt_astr = stardate_to_earth_astronomical(float(sd_str))
-            print(f"   {Fore.GREEN}Astronomical{Style.RESET_ALL}        :  "
+            print(f"   {c('astronomical')}Astronomical{reset()}        :  "
                   f"{dt_astr}  ({dt_astr.strftime('%B %d, %Y')})")
-        except Exception:
-            print(f"   {Fore.RED}Astronomical: ERROR{Style.RESET_ALL}")
+        except (ValueError, StardateError, StardateCLIError):
+            print(f"   {c('error')}Astronomical: ERROR{reset()}")
 
         print(" =================================================================\n")
         return
@@ -379,8 +365,8 @@ def interactive_menu():
             mode_choice = choice_raw.strip()
         except ContinuePrompt:
             continue
-        except StardateCLIError as e:
-            print(f"{Fore.RED}Error [{e.code}]: {e.msg}{Style.RESET_ALL}\n")
+        except StardateCLIError as error:
+            print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
             continue
 
         # MODE MENU
@@ -393,21 +379,22 @@ def interactive_menu():
 
         try:
             mode_raw = input(" Choose mode [default=1]: ")
-            check_user_input(mode_raw)
-            mode = normalize_mode(mode_raw or "no_leap")
+            # allow empty input here intentionally (default)
+            if mode_raw.strip() == "":
+                mode = "no_leap"
+            else:
+                check_user_input(mode_raw)
+                mode = normalize_mode(mode_raw)
 
-            # TODO: make it so it displays the correct mode color for what version it uses
-            # if not, regular yellow works (Fore.YELLOW). though i would like that to be for "all"
-            # CHECK IMPLEMENTATION ON NEW VERSION
-            print(f"\n Using mode: {MODE_COLORS[mode]}{mode}{Style.RESET_ALL}\n")
+
+            print(f"\n Using mode: {c(mode)}{mode}{reset()}\n")
         except ContinuePrompt:
             continue
-        except StardateCLIError as e:
-            print(f"{Fore.RED}Error [{e.code}]: {e.msg}{Style.RESET_ALL}\n")
+        except StardateCLIError as error:
+            print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
             continue
 
         # SELECTION LOGIC
-        # NOTE: I FEEL LIKE YOU CAN CONDENSE THIS 
         try:
             if mode_choice == "1":
                 # EARTH → STARDATE
@@ -431,14 +418,14 @@ def interactive_menu():
                 do_stardate_to_earth(sd_raw, mode)
 
             else:
-                print(f"{Fore.RED}Invalid selection.{Style.RESET_ALL}")
+                print(f"{c('error')}Invalid selection.{reset()}")
 
         except ContinuePrompt:
             continue
         except StardateCLIError as error:
-            print(f"{Fore.RED}Error [{error.code}]: {error.msg}{Style.RESET_ALL}\n")
+            print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
         except Exception as error:
-            print(f"{Fore.RED}Unexpected Error: {error}{Style.RESET_ALL}\n")
+            print(f"{c('error')}Unexpected Error: {error}{reset()}\n")
 
         # Continue?
         again = input(" Convert another? (y/n): ")
@@ -448,7 +435,7 @@ def interactive_menu():
             continue
 
         if again.strip().lower() != "y":
-            print(f"{Fore.CYAN}Goodbye!{Style.RESET_ALL}\n")
+            print(f"{c('info')}Goodbye!{reset()}\n")
             break
 
 
