@@ -85,7 +85,7 @@ dist/                # things meant to be shipped elsewhere
 *.crt
 /old/
 /working_fully_v1.1/
-/terminal_transcripts/*
+/logs/
 stuff.txt
 
 # ===========================
