@@ -151,3 +151,20 @@ Some of it absolutely will be.
 Some of it is aspirational.
 
 All of it is allowed to exist here without judgment (because fuck you I didn't plan on this becoming as big as I wanted it to be)
+
+- - -
+
+MORE.
+
+def prompt_mode(help_cb, error_printer):
+    while True:
+        raw = input(" Choose mode [default=1]: ")
+        if raw.strip() == "":
+            return "no_leap"
+        try:
+            check_user_input(raw, help_cb=help_cb)
+            return normalize_mode(raw)
+        except ContinuePrompt:
+            continue
+        except StardateCLIError as e:
+            error_printer(e)

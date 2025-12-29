@@ -312,7 +312,7 @@ def interactive_menu():
             if mode_raw.strip() == "":
                 mode = "no_leap"
             else:
-                check_user_input(choice_raw, help_cb=help_loop)
+                check_user_input(mode_raw, help_cb=help_loop)
                 mode = normalize_mode(mode_raw)
 
 
@@ -324,31 +324,22 @@ def interactive_menu():
             continue
 
         # SELECTION LOGIC
-        try:
-            if mode_choice == "1":
-                # EARTH → STARDATE
-                y_raw = input(" Year: "); check_user_input(y_raw, help_cb=help_loop)
-                m_raw = input(" Month: "); check_user_input(m_raw, help_cb=help_loop)
-                d_raw = input(" Day: "); check_user_input(d_raw, help_cb=help_loop)
+        mode_raw = input(" Choose mode [default=1]: ")
 
-                y, m, d = parse_earth_date(f"{y_raw}-{m_raw}-{d_raw}", is_leap_year_fn=is_leap_year)
+        if mode_raw.strip() == "":
+            mode = "no_leap"
+        else:
+            try:
+                check_user_input(mode_raw, help_cb=help_loop)
+                mode = normalize_mode(mode_raw)
+            except ContinuePrompt:
+                continue
+            except StardateCLIError as error:
+                print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
+                continue
 
-                do_earth_to_stardate(y, m, d, mode)
+        print(f"\n Using mode: {c(mode)}{mode}{reset()}\n")
 
-            elif mode_choice == "2":
-                sd_raw = input(" Enter stardate: ")
-                check_user_input(sd_raw, help_cb=help_loop)
-                do_stardate_to_earth(sd_raw, mode)
-
-            else:
-                print(f"{c('error')}Invalid selection.{reset()}")
-
-        except ContinuePrompt:
-            continue
-        except StardateCLIError as error:
-            print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
-        except Exception as error:
-            print(f"{c('error')}Unexpected Error: {error}{reset()}\n")
 
         # Continue?
         again = prompt_yes_no(
@@ -370,34 +361,45 @@ def main():
     parser = build_arg_parser()
     args = parser.parse_args()
 
-    # --- Subcommand mode ---
-    if args.command == "earth-to":
-        mode = normalize_mode(args.mode)
+    try:
+        # --- Subcommand mode ---
+        if args.command == "earth-to":
+            mode = normalize_mode(args.mode)
+            y, m, d = parse_earth_date(
+                f"{args.year}-{args.month}-{args.day}",
+                is_leap_year_fn=is_leap_year
+            )
+            do_earth_to_stardate(y, m, d, mode)
+            return
 
-        # Allow month tokens (jan, feb, etc.) by reusing shared parsing
-        y, m, d = parse_earth_date(f"{args.year}-{args.month}-{args.day}", is_leap_year_fn=is_leap_year)
-        do_earth_to_stardate(y, m, d, mode)
-        return
+        if args.command == "sd-to":
+            mode = normalize_mode(args.mode)
+            do_stardate_to_earth(args.stardate, mode)
+            return
 
-    if args.command == "sd-to":
-        mode = normalize_mode(args.mode)
-        do_stardate_to_earth(args.stardate, mode)
-        return
+        # --- Flag-only mode ---
+        if args.from_earth:
+            y, m, d = parse_earth_date(args.from_earth, is_leap_year_fn=is_leap_year)
+            mode = normalize_mode(args.mode)
+            do_earth_to_stardate(y, m, d, mode)
+            return
 
-    # --- Flag-only mode ---
-    if args.from_earth:
-        y, m, d = parse_earth_date(args.from_earth, is_leap_year_fn=is_leap_year)
-        mode = normalize_mode(args.mode)
-        do_earth_to_stardate(y, m, d, mode)
-        return
+        if args.from_sd:
+            mode = normalize_mode(args.mode)
+            do_stardate_to_earth(args.from_sd, mode)
+            return
 
-    if args.from_sd:
-        mode = normalize_mode(args.mode)
-        do_stardate_to_earth(args.from_sd, mode)
-        return
+        # Otherwise interactive fallback
+        interactive_menu()
 
-    # Otherwise interactive fallback
-    interactive_menu()
+    except StardateCLIError as e:
+        print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}")
+        raise SystemExit(2)
+
+    except StardateError as e:
+        # Library-level errors (bad ordinals, etc.)
+        print(f"{c('error')}Error: {e}{reset()}")
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

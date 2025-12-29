@@ -179,23 +179,53 @@ def parse_earth_date(
 def validate_stardate_string(sd_str: str) -> str:
     """
     Strict stardate formatting:
-      - exactly one decimal
+      - must NOT look like an Earth date
+      - requires exactly one decimal
       - digits on both sides
-      - no other characters
+      - numeric only
     """
     check_user_input(sd_str)
     s = sd_str.strip()
 
+    # --- Earth date accidentally entered ---
+    if "-" in s:
+        raise StardateCLIError(
+            "E011",
+            "Stardate must not contain '-' (Earth date detected)."
+        )
+
+    # --- Missing decimal entirely ---
+    if "." not in s:
+        raise StardateCLIError(
+            "E005",
+            "Stardate must contain a decimal (e.g., 2258.042)."
+        )
+
+    # --- Too many decimals ---
     if s.count(".") != 1:
-        raise StardateCLIError("E011", "Stardate must contain exactly one decimal point (e.g., 2258.042).")
+        raise StardateCLIError(
+            "E011",
+            "Stardate must contain exactly one decimal point."
+        )
 
     left, right = s.split(".", 1)
+
+    # --- Decimal present but malformed ---
     if left == "" or right == "":
-        raise StardateCLIError("E011", "Stardate must have digits on both sides of the decimal.")
+        raise StardateCLIError(
+            "E011",
+            "Stardate must have digits on both sides of the decimal."
+        )
+
+    # --- Non-numeric characters ---
     if not left.isdigit() or not right.isdigit():
-        raise StardateCLIError("E011", f"Invalid stardate '{sd_str}' (numeric only).")
+        raise StardateCLIError(
+            "E011",
+            f"Invalid stardate '{sd_str}' (numeric only)."
+        )
 
     return s
+
 
 
 # ============================================================
