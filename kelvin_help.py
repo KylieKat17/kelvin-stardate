@@ -195,7 +195,7 @@ def show_usage_help():
     )
 
     print(
-        f"{Fore.GREEN}2) Flag-style usage{Style.RESET_ALL}\n"
+        f"{c('success')}2) Flag-style usage{reset()}\n"
         "   Earth → Stardate:\n"
         "       python kelvin_stardate_cli.py --from-earth 2258-02-11 --mode all\n\n"
         "   Stardate → Earth:\n"
@@ -208,7 +208,7 @@ def show_usage_help():
     )
 
     print(
-        f"{Fore.GREEN}3) Subcommands{Style.RESET_ALL}\n"
+        f"{c('success')}3) Subcommands{reset()}\n"
         "   Earth → Stardate:\n"
         "       python kelvin_stardate_cli.py earth-to 2258 2 11 --mode all\n\n"
         "   Stardate → Earth:\n"
@@ -222,7 +222,7 @@ def show_examples_help():
     print_section_title("Examples")
 
     print(
-        f"{Fore.GREEN}Example 1 – Earth → Stardate (ALL modes){Style.RESET_ALL}\n"
+        f"{c('success')}Example 1 – Earth → Stardate (ALL modes){reset()}\n"
         "   Input:\n"
         "       python kelvin_stardate_cli.py earth-to 2258 2 11 --mode all\n\n"
         "   Output (shape):\n"
@@ -236,7 +236,7 @@ def show_examples_help():
     )
 
     print(
-        f"{Fore.GREEN}Example 2 – Stardate → Earth (gregorian){Style.RESET_ALL}\n"
+        f"{c('success')}Example 2 – Stardate → Earth (gregorian){reset()}\n"
         "   Input:\n"
         "       python kelvin_stardate_cli.py sd-to 2258.42 --mode greg\n\n"
         "   Output (shape):\n"
@@ -247,7 +247,7 @@ def show_examples_help():
     )
 
     print(
-        f"{Fore.GREEN}Example 3 – Interactive, with help and quit{Style.RESET_ALL}\n"
+        f"{c('success')}Example 3 – Interactive, with help and quit{reset()}\n"
         "   • Run:\n"
         "       python kelvin_stardate_cli.py\n"
         "   • Use 'h' or '/help' at any prompt for this help system.\n"
@@ -259,18 +259,18 @@ def show_troubleshooting_help():
     print_section_title("Troubleshooting & Common Issues")
 
     print(
-        f"{Fore.YELLOW}Problem:{Style.RESET_ALL} Month or date rejected (E002 / E003).\n"
+        f"{c('label')}Problem:{reset()} Month or date rejected (E002 / E003).\n"
         "  → Month may be outside 1–12, or the name may be unrecognized.\n"
         "    Day might be outside 1–31, or invalid for that month and year.\n\n"
-        f"{Fore.YELLOW}Problem:{Style.RESET_ALL} Leap day issues (E004).\n"
+        f"{c('label')}Problem:{reset()} Leap day issues (E004).\n"
         "  → You used February 29 on a year that is not a leap year in the\n"
         "    Gregorian calendar.\n\n"
-        f"{Fore.YELLOW}Problem:{Style.RESET_ALL} Stardate format error (E005).\n"
+        f"{c('label')}Problem:{reset()} Stardate format error (E005).\n"
         "  → Kelvin-style stardates must include a decimal fraction, e.g. 2258.42.\n"
         "    A bare '2258' is not considered valid for conversion.\n\n"
-        f"{Fore.YELLOW}Problem:{Style.RESET_ALL} Empty input (E001).\n"
+        f"{c('label')}Problem:{reset()} Empty input (E001).\n"
         "  → The program expected a value but you just pressed Enter.\n\n"
-        f"{Fore.YELLOW}Problem:{Style.RESET_ALL} Unknown mode (E006).\n"
+        f"{c('label')}Problem:{reset()} Unknown mode (E006).\n"
         "  → Your --mode or menu choice could not be mapped to a known mode.\n"
         "    Try one of: no_leap, gregorian, astronomical, all, or their aliases.\n"
     )
