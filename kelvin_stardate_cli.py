@@ -13,7 +13,18 @@ from kelvin_stardate import (
     is_leap_year,
     StardateError,
 )
-
+from kelvin_cli_input import (
+    ContinuePrompt,
+    check_user_input,
+    parse_year,
+    parse_month,
+    parse_day,
+    parse_earth_date,
+    validate_stardate_string,
+    prompt_until_valid,
+    prompt_menu_choice,
+    prompt_yes_no,
+)
 from kelvin_errors import StardateCLIError
 from kelvin_help import help_loop
 from kelvin_colors import COLORS, c, reset
@@ -23,110 +34,6 @@ from kelvin_colors import COLORS, c, reset
 # Note: fits when screen separated in half (so, terminal on
 # one side and IDE/VENV on the other)
 RESULT_WIDTH = 62 
-
-# ============================================================
-# MONTH NAME LOOKUP
-# ============================================================
-MONTH_LOOKUP = {
-    "jan": 1, "january": 1,
-    "feb": 2, "february": 2,
-    "mar": 3, "march": 3,
-    "apr": 4, "april": 4,
-    "may": 5,
-    "jun": 6, "june": 6,
-    "jul": 7, "july": 7,
-    "aug": 8, "august": 8,
-    "sep": 9, "sept": 9, "september": 9,
-    "oct": 10, "october": 10,
-    "nov": 11, "november": 11,
-    "dec": 12, "december": 12,
-}
-
-
-# ============================================================
-# CONTROL EXCEPTION (help-trigger re-prompt)
-# ============================================================
-
-class ContinuePrompt(Exception):
-    """Raised after help is shown to restart the prompt."""
-    pass
-
-# TODO: ADD RED ERROR STYLING WHERE NECESSARY
-# ============================================================
-# HELP + QUIT + EMPTY HANDLER
-# ============================================================
-
-def check_user_input(value: str):
-    """Resolves q/quit + help/h and empty errors."""
-    if value is None:
-        raise StardateCLIError("E001", "Empty input.")
-
-    stripped = value.strip().lower()
-
-    # Quit
-    if stripped in ("q", "/q", "quit", "exit"):
-        print(f"\n{c('info')}Goodbye!{reset()}\n")
-        raise SystemExit
-
-    # Help
-    if stripped in ("h", "/h", "help", "/help"):
-        help_loop()
-        raise ContinuePrompt
-
-    # Empty string
-    if stripped == "":
-        raise StardateCLIError("E001", "Input cannot be empty.")
-
-    return value
-
-# ============================================================
-# MONTH + DAY PARSERS
-# ============================================================
-
-def parse_month(value: str) -> int:
-    check_user_input(value)
-    raw_month_v = value.strip().lower()
-
-    if raw_month_v in MONTH_LOOKUP:
-        return MONTH_LOOKUP[raw_month_v]
-
-    if raw_month_v.isdigit():
-        m = int(raw_month_v)
-        if 1 <= m <= 12:
-            return m
-        raise StardateCLIError("E002", f"Invalid numeric month '{raw_month_v}'")
-
-    raise StardateCLIError("E002", f"Unrecognized month '{value}'")
-
-
-def parse_day(value: str) -> int:
-    check_user_input(value)
-    raw_day_v = value.strip()
-
-    if not raw_day_v.isdigit():
-        raise StardateCLIError("E002", f"Invalid day '{value}'")
-
-    d = int(raw_day_v)
-    if not (1 <= d <= 31):
-        raise StardateCLIError("E002", f"Day '{d}' out of range 1–31")
-
-    return d
-
-def parse_earth_date(date_str: str):
-    check_user_input(date_str)
-    parts = date_str.strip().split("-")
-    if len(parts) != 3:
-        raise StardateCLIError("E002", f"Invalid date '{date_str}'. Expected YYYY-MM-DD.")
-
-    y_raw, m_raw, d_raw = parts
-    y = int(check_user_input(y_raw))
-    m = parse_month(m_raw)
-    d = parse_day(d_raw)
-
-    if m == 2 and d == 29 and not is_leap_year(y):
-        raise StardateCLIError("E003", f"{y} is not a leap year.")
-
-    return y, m, d
 
 
 # ============================================================
@@ -161,8 +68,6 @@ def detect_stardate_type(sd: str):
         return "kelvin"
 
     return "astronomical" if len(frac) >= 4 else "kelvin"
-
-# TODO: MAKE SURE ==== IS UNIFORM REGARDLESS OF RESULT TYPE
 
 # ============================================================
 # RESULT PRINTER (Unified print block for single-mode)
@@ -243,8 +148,8 @@ def do_earth_to_stardate(y, m, d, mode):
 # ============================================================
 
 def do_stardate_to_earth(sd_str, mode):
-    if "." not in sd_str:
-        raise StardateCLIError("E005", "Stardate must contain a decimal.")
+    # --- Decimals and validation ---
+    sd_str = validate_stardate_string(sd_str)
 
     # ---- ALL MODE ----
     if mode == "all":
@@ -386,15 +291,12 @@ def interactive_menu():
         print("   2) Stardate → Earth")
         print("------------------------------------------------------------")
 
-        try:
-            choice_raw = input(" Select an option: ")
-            check_user_input(choice_raw)
-            mode_choice = choice_raw.strip()
-        except ContinuePrompt:
-            continue
-        except StardateCLIError as error:
-            print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
-            continue
+        mode_choice = prompt_menu_choice(
+            " Select an option: ",
+            ("1", "2"),
+            help_cb=help_loop,
+            error_printer=lambda e: print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}\n"),
+        )
 
         # MODE MENU
         print("\n Leap Year / Fractional Mode:")
@@ -410,7 +312,7 @@ def interactive_menu():
             if mode_raw.strip() == "":
                 mode = "no_leap"
             else:
-                check_user_input(mode_raw)
+                check_user_input(choice_raw, help_cb=help_loop)
                 mode = normalize_mode(mode_raw)
 
 
@@ -425,23 +327,17 @@ def interactive_menu():
         try:
             if mode_choice == "1":
                 # EARTH → STARDATE
-                y_raw = input(" Year: "); check_user_input(y_raw)
-                m_raw = input(" Month: "); check_user_input(m_raw)
-                d_raw = input(" Day: "); check_user_input(d_raw)
+                y_raw = input(" Year: "); check_user_input(y_raw, help_cb=help_loop)
+                m_raw = input(" Month: "); check_user_input(m_raw, help_cb=help_loop)
+                d_raw = input(" Day: "); check_user_input(d_raw, help_cb=help_loop)
 
-                y = int(y_raw)
-                m = parse_month(m_raw)
-                d = parse_day(d_raw)
-
-                # Leap-day validation
-                if m == 2 and d == 29 and not is_leap_year(y):
-                    raise StardateCLIError("E003", f"{y} is not a leap year.")
+                y, m, d = parse_earth_date(f"{y_raw}-{m_raw}-{d_raw}", is_leap_year_fn=is_leap_year)
 
                 do_earth_to_stardate(y, m, d, mode)
 
             elif mode_choice == "2":
                 sd_raw = input(" Enter stardate: ")
-                check_user_input(sd_raw)
+                check_user_input(sd_raw, help_cb=help_loop)
                 do_stardate_to_earth(sd_raw, mode)
 
             else:
@@ -455,15 +351,15 @@ def interactive_menu():
             print(f"{c('error')}Unexpected Error: {error}{reset()}\n")
 
         # Continue?
-        again = input(" Convert another? (y/n): ")
-        try:
-            check_user_input(again)
-        except ContinuePrompt:
-            continue
-
-        if again.strip().lower() != "y":
+        again = prompt_yes_no(
+            " Convert another? (y/n): ",
+            help_cb=help_loop,
+            error_printer=lambda e: print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}\n"),
+        )
+        if not again:
             print(f"\n{c('info')}Goodbye!{reset()}\n")
             break
+
 
 
 # ============================================================
@@ -479,9 +375,7 @@ def main():
         mode = normalize_mode(args.mode)
 
         # Allow month tokens (jan, feb, etc.) by reusing shared parsing
-        # Note: requires earth-to subcommand args to be type=str (year/month/day),
-        # or at least month/day to be str.
-        y, m, d = parse_earth_date(f"{args.year}-{args.month}-{args.day}")
+        y, m, d = parse_earth_date(f"{args.year}-{args.month}-{args.day}", is_leap_year_fn=is_leap_year)
         do_earth_to_stardate(y, m, d, mode)
         return
 
@@ -492,7 +386,7 @@ def main():
 
     # --- Flag-only mode ---
     if args.from_earth:
-        y, m, d = parse_earth_date(args.from_earth)
+        y, m, d = parse_earth_date(args.from_earth, is_leap_year_fn=is_leap_year)
         mode = normalize_mode(args.mode)
         do_earth_to_stardate(y, m, d, mode)
         return

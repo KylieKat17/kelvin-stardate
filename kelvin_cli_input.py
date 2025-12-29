@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Callable, Optional, Tuple
 
 from kelvin_errors import StardateCLIError
+from kelvin_colors import c, reset
 
 
 # ============================================================
@@ -29,7 +30,6 @@ class ContinuePrompt(Exception):
 # ============================================================
 # MONTH NAME LOOKUP
 # ============================================================
-
 MONTH_LOOKUP = {
     "jan": 1, "january": 1,
     "feb": 2, "february": 2,
@@ -47,7 +47,8 @@ MONTH_LOOKUP = {
 
 
 # ============================================================
-# HELP / QUIT / EMPTY HANDLER
+# HELP + QUIT + EMPTY HANDLER
+# TODO: ADD RED ERROR STYLING WHERE NECESSARY
 # ============================================================
 
 def check_user_input(value: str, help_cb: Optional[Callable[[], None]] = None) -> str:
@@ -64,14 +65,18 @@ def check_user_input(value: str, help_cb: Optional[Callable[[], None]] = None) -
 
     stripped = value.strip().lower()
 
-    if stripped in ("q", "/q", "quit", "exit"):
+    # Quit
+    if stripped in ("q", "-q", "/q", "quit", "exit"):
+        print(f"\n{c('info')}Goodbye!{reset()}\n")
         raise SystemExit
 
-    if stripped in ("h", "/h", "help", "/help"):
+    # Help
+    if stripped in ("h", "/h", "-h", "-help", "help", "/help"):
         if help_cb:
             help_cb()
         raise ContinuePrompt
 
+    # Empty string
     if stripped == "":
         raise StardateCLIError("E001", "Input cannot be empty.")
 
@@ -80,6 +85,7 @@ def check_user_input(value: str, help_cb: Optional[Callable[[], None]] = None) -
 
 # ============================================================
 # PARSERS
+# MONTH + DAY + YEAR
 # ============================================================
 
 def parse_year(value: str) -> int:
@@ -91,15 +97,15 @@ def parse_year(value: str) -> int:
       - no decimals
     """
     check_user_input(value)
-    raw = value.strip()
+    raw_year_v = value.strip()
 
-    if "." in raw:
+    if "." in raw_year_v:
         raise StardateCLIError("E007", f"Invalid year '{value}' (must be an integer).")
 
-    if not raw.isdigit():
+    if not raw_year_v.isdigit():
         raise StardateCLIError("E007", f"Invalid year '{value}' (numeric only).")
 
-    y = int(raw)
+    y = int(raw_year_v)
     if not (1 <= y <= 9999):
         raise StardateCLIError("E008", f"Year '{y}' out of range 1–9999.")
 
@@ -108,28 +114,28 @@ def parse_year(value: str) -> int:
 
 def parse_month(value: str) -> int:
     check_user_input(value)
-    raw = value.strip().lower()
+    raw_month_v = value.strip().lower()
 
-    if raw in MONTH_LOOKUP:
-        return MONTH_LOOKUP[raw]
+    if raw_month_v in MONTH_LOOKUP:
+        return MONTH_LOOKUP[raw_month_v]
 
-    if raw.isdigit():
-        m = int(raw)
+    if raw_month_v.isdigit():
+        m = int(raw_month_v)
         if 1 <= m <= 12:
             return m
-        raise StardateCLIError("E002", f"Invalid numeric month '{raw}'")
+        raise StardateCLIError("E002", f"Invalid numeric month '{raw_month_v}'")
 
     raise StardateCLIError("E002", f"Unrecognized month '{value}'")
 
 
 def parse_day(value: str) -> int:
     check_user_input(value)
-    raw = value.strip()
+    raw_day_v = value.strip()
 
-    if not raw.isdigit():
+    if not raw_day_v.isdigit():
         raise StardateCLIError("E002", f"Invalid day '{value}'")
 
-    d = int(raw)
+    d = int(raw_day_v)
     if not (1 <= d <= 31):
         raise StardateCLIError("E002", f"Day '{d}' out of range 1–31")
 
@@ -147,12 +153,12 @@ def parse_earth_date(
       - YYYY-mon-DD (mon = jan/feb/...)
 
     NOTE: takes is_leap_year_fn injected from kelvin_stardate.py to avoid
-    importing library-level rules here unless you prefer to.
+    importing library-level rules here.
     """
     check_user_input(date_str)
-    raw = date_str.strip()
+    raw_date = date_str.strip()
 
-    parts = raw.split("-")
+    parts = raw_date.split("-")
     if len(parts) != 3:
         raise StardateCLIError("E012", f"Invalid date '{date_str}'. Expected YYYY-MM-DD.")
 
@@ -167,7 +173,9 @@ def parse_earth_date(
 
     return y, m, d
 
-
+# ============================================================
+# VALIDATION HELPERS
+# ============================================================
 def validate_stardate_string(sd_str: str) -> str:
     """
     Strict stardate formatting:
