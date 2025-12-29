@@ -2,19 +2,9 @@
 kelvin_colors.py
 
 Centralized color and style definitions for the Kelvin Stardate Converter.
-
-This module exists so we do NOT have to:
-- redefine color globals in every file
-- remember which Fore.LIGHT_* looks readable in PowerShell
-- initialize colorama more than once
-
-If output styling changes, it should happen here.
 """
 
-from colorama import init, Fore, Style
-
-# Initialize colorama once, globally
-init(autoreset=True)
+from colorama import Fore, Style
 
 # ============================================================
 # Semantic Color Palette
@@ -41,7 +31,7 @@ COLORS = {
 }
 
 # ============================================================
-# Convenience Accessors (Optional, but Nice)
+# Convenience Accessors
 # ============================================================
 
 def c(name: str) -> str:

@@ -3,7 +3,8 @@
 import argparse
 from datetime import date
 
-# imports!
+from colorama import init as colorama_init
+
 from kelvin_stardate import (
     earth_to_stardate,
     stardate_to_earth,
@@ -14,12 +15,13 @@ from kelvin_stardate import (
 
 from kelvin_errors import StardateCLIError
 from kelvin_help import help_loop
-
-# UPDATING TO GLOBALLIZED IMPORTS
 from kelvin_colors import COLORS, c, reset
 
+
 # For header output width
-RESULT_WIDTH = 68
+# Note: fits when screen separated in half (so, terminal on
+# one side and IDE/VENV on the other)
+RESULT_WIDTH = 62 
 
 # ============================================================
 # MONTH NAME LOOKUP
@@ -458,6 +460,7 @@ def interactive_menu():
 # ============================================================
 
 def main():
+    colorama_init(autoreset=True)  # init once, only when executing CLI
     parser = build_arg_parser()
     args = parser.parse_args()
 
@@ -474,6 +477,11 @@ def main():
 
     # --- Flag-only mode ---
     if args.from_earth:
+        #FIXME need to normalize before converting to int bc of char month inputs
+        """ y = int(y_raw)
+        m = parse_month(m_raw)
+        d = parse_day(d_raw)
+        parse_month() """
         y, m, d = map(int, args.from_earth.split("-"))
         mode = normalize_mode(args.mode)
         do_earth_to_stardate(y, m, d, mode)
@@ -489,4 +497,5 @@ def main():
 
 
 if __name__ == "__main__":
+    colorama_init(autoreset=True)
     main()

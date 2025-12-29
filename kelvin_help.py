@@ -11,19 +11,14 @@ Provides:
 This module is intentionally CLI-focused: no conversion logic lives here.
 """
 
-from colorama import Fore, Style, init as colorama_init
 from kelvin_errors import (
     list_error_codes_ordered,
     format_error_for_help,
     StardateCLIError,
 )
 
-# TODO: If we later centralize colors (e.g., kelvin_colors.py),
-#       this module should import from there instead of defining
-#       its own constants.
-
-# Initialize color support (safe to call multiple times)
-colorama_init(autoreset=True)
+# Initialize color support
+from kelvin_colors import c, reset
 
 
 class ContinuePrompt(Exception):
@@ -32,13 +27,6 @@ class ContinuePrompt(Exception):
     should re-ask the question afterwards. The CLI catches this and continues.
     """
     pass
-
-
-# Soft mode-colors to roughly match CLI MODE_COLORS
-MODE_COLOR_NO_LEAP = Fore.LIGHTBLUE_EX
-MODE_COLOR_GREGORIAN = Fore.LIGHTCYAN_EX
-MODE_COLOR_ASTRONOMICAL = Fore.LIGHTGREEN_EX
-MODE_COLOR_ALL = Fore.LIGHTYELLOW_EX
 
 
 # ============================================================
@@ -56,7 +44,7 @@ def print_banner(title: str):
 
 
 def print_section_title(title: str):
-    print(f"\n{Fore.CYAN}== {title} =={Style.RESET_ALL}\n")
+    print(f"\n{c('info')}== {title} =={reset()}\n")
 
 
 def press_enter_or_quit():
@@ -67,11 +55,11 @@ def press_enter_or_quit():
     (mirroring CLI 'quit at any time' behavior).
     """
     text = input(
-        f"\n{Fore.YELLOW}[Press Enter to return to the help menu, or 'q' to quit]{Style.RESET_ALL} "
+        f"\n{c('label')}[Press Enter to return to the help menu, or 'q' to quit]{reset()} "
     ).strip().lower()
 
-    if text in ("q", "/q", "quit", "exit"):
-        print(f"\n{Fore.CYAN}Goodbye!{Style.RESET_ALL}\n")
+    if text in ("-q", "q", "/q", "quit", "exit"):
+        print(f"\n{c('info')}Goodbye!{reset()}\n")
         raise SystemExit
 
 
@@ -120,7 +108,7 @@ def show_modes_help():
     )
 
     print(
-        f"{MODE_COLOR_NO_LEAP}no_leap{Style.RESET_ALL}  "
+        f"{c('no_leap')}no_leap{reset()}  "
         "(aliases: 'noleap', 'nl', '1')\n"
         "  • Uses a 365-day year and ignores leap years entirely.\n"
         "  • This roughly matches Orci's simplified \"day of year\" description,\n"
@@ -129,7 +117,7 @@ def show_modes_help():
     )
 
     print(
-        f"{MODE_COLOR_GREGORIAN}gregorian{Style.RESET_ALL}  "
+        f"{c('gregorian')}gregorian{reset()}  "
         "(aliases: 'greg', 'gr', '2')\n"
         "  • Uses real-world Gregorian calendar rules:\n"
         "      - divisible by 4   ⇒ leap year\n"
@@ -141,7 +129,7 @@ def show_modes_help():
     )
 
     print(
-        f"{MODE_COLOR_ASTRONOMICAL}astronomical{Style.RESET_ALL}  "
+        f"{c('astronomical')}astronomical{reset()}  "
         "(aliases: 'astro', 'astr', '3')\n"
         "  • Uses a mean tropical year length of 365.2425 days.\n"
         "  • Treats the decimal as a continuous fraction of the year in pure\n"
@@ -151,7 +139,7 @@ def show_modes_help():
     )
 
     print(
-        f"{MODE_COLOR_ALL}all{Style.RESET_ALL}  "
+        f"{c('all')}all{reset()}  "
         "(aliases: 'a', '4')\n"
         "  • Computes and displays conversions under all three modes at once.\n"
         "  • This is especially helpful when you're trying to decide which mode\n"
@@ -180,7 +168,7 @@ def show_error_codes_help(dev_mode: bool = False):
 
     for info in list_error_codes_ordered():
         text = format_error_for_help(info.code, dev_mode=dev_mode)
-        print(f"  {Fore.YELLOW}{text}{Style.RESET_ALL}\n")
+        print(f"  {c('label')}{text}{reset()}\n")
 
     print(
         "If you see an error code not listed here, it may be newly added in\n"
@@ -193,9 +181,9 @@ def show_usage_help():
     print_section_title("Usage (Interactive, Flags, Subcommands)")
 
     print(
-        f"{Fore.GREEN}1) Interactive mode{Style.RESET_ALL}\n"
+        f"{c('success')}1) Interactive mode{reset()}\n"
         "   Run with no arguments:\n"
-        "       python kelvin_stardate_cli.py\n\n"
+        "       python .\kelvin_stardate_cli.py\n\n"
         "   You'll see a menu:\n"
         "       1) Earth → Stardate\n"
         "       2) Stardate → Earth\n\n"
@@ -326,15 +314,15 @@ def help_loop():
         print("   4) Usage (interactive, flags, subcommands)")
         print("   5) Examples")
         print("   6) Troubleshooting / Common Issues")
-        print("   7) Return to previous prompt")
-        print("   8) All topics (full help dump)")
+        print("   7) All topics (full help dump)")
+        print("   8) Return to previous prompt")
         print("------------------------------------------------------------")
 
         choice = input(" Select a help topic (1-8, or letter): ").strip().lower()
 
         # Quit-at-any-time behavior inside help
         if choice in ("q", "/q", "quit", "exit"):
-            print(f"\n{Fore.CYAN}Goodbye!{Style.RESET_ALL}\n")
+            print(f"\n{c('info')}Goodbye!{reset()}\n")
             raise SystemExit
 
         
@@ -367,7 +355,7 @@ def help_loop():
             show_troubleshooting_help()
             press_enter_or_quit()
         else:
-            print(f"{Fore.RED} Unrecognized choice. Please select 1–8 or a matching letter.{Style.RESET_ALL}")
+            print(f"{c('error')} Unrecognized choice. Please select 1–8 or a matching letter.{reset()}")
             press_enter_or_quit()
 
 
