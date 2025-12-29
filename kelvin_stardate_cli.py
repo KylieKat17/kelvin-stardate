@@ -10,6 +10,7 @@ from kelvin_stardate import (
     stardate_to_earth,
     earth_to_stardate_astronomical,
     stardate_to_earth_astronomical,
+    is_leap_year,
     StardateError,
 )
 
@@ -111,11 +112,21 @@ def parse_day(value: str) -> int:
 
     return d
 
-# ============================================================
-# LEAP YEAR CHECK
-# ============================================================
-def is_leap_year(year: int) -> bool:
-    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+def parse_earth_date(date_str: str):
+    check_user_input(date_str)
+    parts = date_str.strip().split("-")
+    if len(parts) != 3:
+        raise StardateCLIError("E002", f"Invalid date '{date_str}'. Expected YYYY-MM-DD.")
+
+    y_raw, m_raw, d_raw = parts
+    y = int(check_user_input(y_raw))
+    m = parse_month(m_raw)
+    d = parse_day(d_raw)
+
+    if m == 2 and d == 29 and not is_leap_year(y):
+        raise StardateCLIError("E003", f"{y} is not a leap year.")
+
+    return y, m, d
 
 
 # ============================================================
@@ -333,7 +344,7 @@ def build_arg_parser():
         description="Convert a calendar Earth date into a Kelvin-format stardate.",
     )
     earth_to.add_argument("year", type=int, help="Year (e.g., 2258)")
-    earth_to.add_argument("month", type=int, help="Month number (1–12)")
+    earth_to.add_argument("month", type=str, help="Month number (1–12) or name/abbreviation (e.g., January)")
     earth_to.add_argument("day", type=int, help="Day of the month (1–31)")
     earth_to.add_argument(
         "--mode", type=str, default="no_leap",
@@ -460,14 +471,18 @@ def interactive_menu():
 # ============================================================
 
 def main():
-    colorama_init(autoreset=True)  # init once, only when executing CLI
     parser = build_arg_parser()
     args = parser.parse_args()
 
     # --- Subcommand mode ---
     if args.command == "earth-to":
         mode = normalize_mode(args.mode)
-        do_earth_to_stardate(args.year, args.month, args.day, mode)
+
+        # Allow month tokens (jan, feb, etc.) by reusing shared parsing
+        # Note: requires earth-to subcommand args to be type=str (year/month/day),
+        # or at least month/day to be str.
+        y, m, d = parse_earth_date(f"{args.year}-{args.month}-{args.day}")
+        do_earth_to_stardate(y, m, d, mode)
         return
 
     if args.command == "sd-to":
@@ -477,12 +492,7 @@ def main():
 
     # --- Flag-only mode ---
     if args.from_earth:
-        #FIXME need to normalize before converting to int bc of char month inputs
-        """ y = int(y_raw)
-        m = parse_month(m_raw)
-        d = parse_day(d_raw)
-        parse_month() """
-        y, m, d = map(int, args.from_earth.split("-"))
+        y, m, d = parse_earth_date(args.from_earth)
         mode = normalize_mode(args.mode)
         do_earth_to_stardate(y, m, d, mode)
         return
