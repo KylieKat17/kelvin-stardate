@@ -183,7 +183,7 @@ def show_usage_help():
     print(
         f"{c('success')}1) Interactive mode{reset()}\n"
         "   Run with no arguments:\n"
-        "       python .\kelvin_stardate_cli.py\n\n"
+        "       python .\\kelvin_stardate_cli.py\n\n"
         "   You'll see a menu:\n"
         "       1) Earth → Stardate\n"
         "       2) Stardate → Earth\n\n"
