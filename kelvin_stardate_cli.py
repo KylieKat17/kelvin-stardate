@@ -278,6 +278,9 @@ def build_arg_parser():
 
 def interactive_menu():
 
+    def print_cli_error(e: StardateCLIError):
+        print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}\n")
+
     print()
     print("╔══════════════════════════════════════════════════════════╗")
     print("║        KELVIN TIMELINE STARDATE CONVERTER (v1.5)         ║")
@@ -286,7 +289,10 @@ def interactive_menu():
     print("╚══════════════════════════════════════════════════════════╝\n")
 
     while True:
-        # TODO: add a print something here because it just looks odd in terminal. no clue why it looks odd, it just does
+        # --------------------------------------------
+        # Choose conversion direction
+        # --------------------------------------------
+        print(" Conversion Modes:")
         print("   1) Earth → Stardate")
         print("   2) Stardate → Earth")
         print("------------------------------------------------------------")
@@ -295,10 +301,12 @@ def interactive_menu():
             " Select an option: ",
             ("1", "2"),
             help_cb=help_loop,
-            error_printer=lambda e: print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}\n"),
+            error_printer=print_cli_error,
         )
 
-        # MODE MENU
+        # --------------------------------------------
+        # Choose leap/fraction mode (with default)
+        # --------------------------------------------
         print("\n Leap Year / Fractional Mode:")
         print(f"   1) {c('no_leap')}no_leap{reset()}       (Orci-style 1..365)")
         print(f"   2) {c('gregorian')}gregorian{reset()}     (true leap-year handling)")
@@ -306,46 +314,83 @@ def interactive_menu():
         print(f"   4) {c('all')}all{reset()}           (display all modes)")
         print("------------------------------------------------------------")
 
-        try:
-            mode_raw = input(" Choose mode [default=1]: ")
-            # allow empty input here intentionally (default)
-            if mode_raw.strip() == "":
-                mode = "no_leap"
-            else:
-                check_user_input(mode_raw, help_cb=help_loop)
-                mode = normalize_mode(mode_raw)
-
-
-            print(f"\n Using mode: {c(mode)}{mode}{reset()}\n")
-        except ContinuePrompt:
-            continue
-        except StardateCLIError as error:
-            print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
-            continue
-
-        # SELECTION LOGIC
-        mode_raw = input(" Choose mode [default=1]: ")
-
-        if mode_raw.strip() == "":
-            mode = "no_leap"
-        else:
+        # We need to allow empty input here for default selection.
+        # prompt_until_valid() currently disallows empty via check_user_input.
+        while True:
             try:
-                check_user_input(mode_raw, help_cb=help_loop)
-                mode = normalize_mode(mode_raw)
+                raw = input(" Choose mode [default=1]: ")
+
+                # Default selection on empty
+                if raw.strip() == "":
+                    mode = "no_leap"
+                    break
+
+                # Normal help/quit + validation path
+                check_user_input(raw, help_cb=help_loop)
+                mode = normalize_mode(raw)
+                break
+
             except ContinuePrompt:
+                # help printed; re-prompt
                 continue
-            except StardateCLIError as error:
-                print(f"{c('error')}Error [{error.code}]: {error.msg}{reset()}\n")
-                continue
+            except StardateCLIError as e:
+                print_cli_error(e)
 
         print(f"\n Using mode: {c(mode)}{mode}{reset()}\n")
 
+        # --------------------------------------------
+        # Gather inputs + perform conversion
+        # --------------------------------------------
+        try:
+            if mode_choice == "1":
+                # Earth -> Stardate
+                print(" Enter Earth date components:")
+                y = prompt_until_valid(
+                    "   Year  (YYYY): ",
+                    parse_year,
+                    help_cb=help_loop,
+                    error_printer=print_cli_error,
+                )
+                m = prompt_until_valid(
+                    "   Month (1-12 or name): ",
+                    parse_month,
+                    help_cb=help_loop,
+                    error_printer=print_cli_error,
+                )
+                d = prompt_until_valid(
+                    "   Day   (1-31): ",
+                    parse_day,
+                    help_cb=help_loop,
+                    error_printer=print_cli_error,
+                )
 
-        # Continue?
+                do_earth_to_stardate(y, m, d, mode)
+
+            else:
+                # Stardate -> Earth
+                sd = prompt_until_valid(
+                    " Enter stardate (e.g., 2258.042): ",
+                    validate_stardate_string,
+                    help_cb=help_loop,
+                    error_printer=print_cli_error,
+                )
+
+                do_stardate_to_earth(sd, mode)
+
+        except StardateCLIError as e:
+            print_cli_error(e)
+            continue
+        except StardateError as e:
+            print(f"{c('error')}Error: {e}{reset()}\n")
+            continue
+
+        # --------------------------------------------
+        # Replay?
+        # --------------------------------------------
         again = prompt_yes_no(
             " Convert another? (y/n): ",
             help_cb=help_loop,
-            error_printer=lambda e: print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}\n"),
+            error_printer=print_cli_error,
         )
         if not again:
             print(f"\n{c('info')}Goodbye!{reset()}\n")

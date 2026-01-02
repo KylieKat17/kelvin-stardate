@@ -156,6 +156,7 @@ All of it is allowed to exist here without judgment (because fuck you I didn't p
 
 MORE.
 
+- make 
 def prompt_mode(help_cb, error_printer):
     while True:
         raw = input(" Choose mode [default=1]: ")

@@ -12,10 +12,12 @@ Responsibilities:
 
 from __future__ import annotations
 
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, TypeVar
 
 from kelvin_errors import StardateCLIError
 from kelvin_colors import c, reset
+
+T = TypeVar("T")
 
 
 # ============================================================
@@ -48,7 +50,6 @@ MONTH_LOOKUP = {
 
 # ============================================================
 # HELP + QUIT + EMPTY HANDLER
-# TODO: ADD RED ERROR STYLING WHERE NECESSARY
 # ============================================================
 
 def check_user_input(value: str, help_cb: Optional[Callable[[], None]] = None) -> str:
@@ -71,7 +72,7 @@ def check_user_input(value: str, help_cb: Optional[Callable[[], None]] = None) -
         raise SystemExit
 
     # Help
-    if stripped in ("h", "/h", "-h", "-help", "help", "/help"):
+    if stripped in ("h", "/h", "-h", "--help", "-help", "help", "/help"):
         if help_cb:
             help_cb()
         raise ContinuePrompt
@@ -91,7 +92,7 @@ def check_user_input(value: str, help_cb: Optional[Callable[[], None]] = None) -
 def parse_year(value: str) -> int:
     """
     Strict numeric years only for Earth dates.
-    Suggested rules:
+    Rules:
       - digits only
       - 1..9999 range (datetime.date limits)
       - no decimals
@@ -173,9 +174,11 @@ def parse_earth_date(
 
     return y, m, d
 
+
 # ============================================================
 # VALIDATION HELPERS
 # ============================================================
+
 def validate_stardate_string(sd_str: str) -> str:
     """
     Strict stardate formatting:
@@ -227,32 +230,53 @@ def validate_stardate_string(sd_str: str) -> str:
     return s
 
 
-
 # ============================================================
 # PROMPT HELPERS (interactive reprompt loops)
 # ============================================================
 
 def prompt_until_valid(
     prompt: str,
-    parser_func: Callable[[str], object],
+    parser_func: Callable[[str], T],
     *,
     help_cb: Optional[Callable[[], None]] = None,
-    error_printer: Optional[Callable[[StardateCLIError], None]] = None
-):
+    error_printer: Optional[Callable[[StardateCLIError], None]] = None,
+    reprompt: str = "> ",
+) -> T:
     """
-    Re-prompts until parser_func succeeds.
-    error_printer is injected from CLI so this module stays UI-agnostic.
+    Othello-style prompting:
+      - shows `prompt` only on the first attempt
+      - after an error, shows `reprompt` (default: "> ")
+      - always prints errors (either via error_printer or a default formatter)
+      - supports help/quit via check_user_input
+
+    parser_func should raise StardateCLIError for user-facing validation errors.
+    If parser_func raises ValueError, we wrap it to keep UX consistent.
     """
+    first = True
     while True:
         try:
-            raw = input(prompt)
+            raw = input(prompt if first else reprompt)
+            first = False
             check_user_input(raw, help_cb=help_cb)
             return parser_func(raw)
+
         except ContinuePrompt:
+            # help was shown; re-prompt (keep minimal reprompt feel)
+            first = False
             continue
+
         except StardateCLIError as err:
             if error_printer:
                 error_printer(err)
+            else:
+                print(f"{c('error')}Error [{err.code}]: {err.msg}{reset()}")
+
+        except ValueError as err:
+            wrapped = StardateCLIError("E002", str(err) or "Invalid value.")
+            if error_printer:
+                error_printer(wrapped)
+            else:
+                print(f"{c('error')}Error [{wrapped.code}]: {wrapped.msg}{reset()}")
 
 
 def prompt_menu_choice(
@@ -261,33 +285,50 @@ def prompt_menu_choice(
     *,
     help_cb: Optional[Callable[[], None]] = None,
     error_printer: Optional[Callable[[StardateCLIError], None]] = None,
+    reprompt: str = "> ",
     code: str = "E009",
     msg: str = "Invalid selection."
 ) -> str:
+    """
+    Menu choice prompt with Othello-style minimal reprompting.
+    """
+    first = True
     while True:
         try:
-            raw = input(prompt)
+            raw = input(prompt if first else reprompt)
+            first = False
             check_user_input(raw, help_cb=help_cb)
             s = raw.strip()
             if s in valid:
                 return s
             raise StardateCLIError(code, msg)
+
         except ContinuePrompt:
+            first = False
             continue
+
         except StardateCLIError as err:
             if error_printer:
                 error_printer(err)
+            else:
+                print(f"{c('error')}Error [{err.code}]: {err.msg}{reset()}")
 
 
 def prompt_yes_no(
     prompt: str,
     *,
     help_cb: Optional[Callable[[], None]] = None,
-    error_printer: Optional[Callable[[StardateCLIError], None]] = None
+    error_printer: Optional[Callable[[StardateCLIError], None]] = None,
+    reprompt: str = "> ",
 ) -> bool:
+    """
+    Yes/No prompt with Othello-style minimal reprompting.
+    """
+    first = True
     while True:
         try:
-            raw = input(prompt)
+            raw = input(prompt if first else reprompt)
+            first = False
             check_user_input(raw, help_cb=help_cb)
             s = raw.strip().lower()
             if s in ("y", "yes"):
@@ -295,8 +336,13 @@ def prompt_yes_no(
             if s in ("n", "no"):
                 return False
             raise StardateCLIError("E010", "Please enter y/n (or yes/no).")
+
         except ContinuePrompt:
+            first = False
             continue
+
         except StardateCLIError as err:
             if error_printer:
                 error_printer(err)
+            else:
+                print(f"{c('error')}Error [{err.code}]: {err.msg}{reset()}")
