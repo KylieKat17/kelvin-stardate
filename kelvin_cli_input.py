@@ -112,6 +112,29 @@ def parse_year(value: str) -> int:
 
     return y
 
+def parse_year_yyyy(value: str) -> int:
+    """
+    Strict 4-digit year input (YYYY).
+    Useful for CLI UX when prompt explicitly says (YYYY).
+    """
+    check_user_input(value)
+    raw = value.strip()
+
+    if "." in raw:
+        raise StardateCLIError("E007", f"Invalid year '{value}' (must be an integer).")
+
+    if not raw.isdigit():
+        raise StardateCLIError("E007", f"Invalid year '{value}' (numeric only).")
+
+    if len(raw) != 4:
+        raise StardateCLIError("E007", f"Invalid year '{value}' (expected 4 digits, YYYY).")
+
+    y = int(raw)
+    if not (1 <= y <= 9999):
+        raise StardateCLIError("E008", f"Year '{y}' out of range 1–9999.")
+
+    return y
+
 
 def parse_month(value: str) -> int:
     check_user_input(value)
@@ -181,11 +204,13 @@ def parse_earth_date(
 
 def validate_stardate_string(sd_str: str) -> str:
     """
-    Strict stardate formatting:
+    Strict stardate formatting + sanity bounds:
       - must NOT look like an Earth date
       - requires exactly one decimal
       - digits on both sides
       - numeric only
+      - year must be 4 digits (0001–9999) to match Python library and Kelvin timeline expectations
+      - fractional part length must be reasonable to avoid overflow paths
     """
     check_user_input(sd_str)
     s = sd_str.strip()
@@ -227,6 +252,56 @@ def validate_stardate_string(sd_str: str) -> str:
             f"Invalid stardate '{sd_str}' (numeric only)."
         )
 
+    # --- Kelvin timeline sanity: year must be 4 digits (0001–9999) ---
+    if len(left) != 4:
+        raise StardateCLIError(
+            "E011",
+            f"Invalid stardate '{sd_str}' (year must be 4 digits, e.g., 2258.042)."
+        )
+
+    year = int(left)
+    if not (1 <= year <= 9999):
+        raise StardateCLIError(
+            "E011",
+            f"Invalid stardate '{sd_str}' (year out of range 0001–9999)."
+        )
+
+    # --- Prevent absurdly long fractional parts (keeps float/date math safe) ---
+    # Kelvin stardates are typically 3 digits; astronomical uses 4+.
+    # Allow up to 8 to be generous, but block extreme inputs that can cause overflow.
+    if len(right) > 8:
+        raise StardateCLIError(
+            "E011",
+            f"Invalid stardate '{sd_str}' (fractional part too long)."
+        )
+
+    return s
+
+
+def validate_kelvin_stardate_string(sd_str: str) -> str:
+    """
+    Kelvin-format stardate:
+      - YYYY.DDD (DDD = ordinal day, 001–365/366-ish depending on interpretation)
+      - exactly 4-digit year
+      - exactly 3-digit fractional ordinal
+    """
+    s = validate_stardate_string(sd_str)  # uses existing sanity checks
+    left, right = s.split(".", 1)
+
+    if len(right) != 3:
+        raise StardateCLIError(
+            "E011",
+            f"Invalid Kelvin stardate '{sd_str}' (expected 3-digit ordinal, e.g., 2258.042)."
+        )
+
+    # Enforce ordinal range 001–366 (helps UX a lot)
+    ordinal = int(right)
+    if not (1 <= ordinal <= 366):
+        raise StardateCLIError(
+            "E011",
+            f"Invalid Kelvin stardate '{sd_str}' (ordinal day must be 001–366)."
+        )
+
     return s
 
 
@@ -240,12 +315,12 @@ def prompt_until_valid(
     *,
     help_cb: Optional[Callable[[], None]] = None,
     error_printer: Optional[Callable[[StardateCLIError], None]] = None,
-    reprompt: str = "> ",
+    reprompt: str = " > ",
 ) -> T:
     """
-    Othello-style prompting:
+    Simple-style prompting:
       - shows `prompt` only on the first attempt
-      - after an error, shows `reprompt` (default: "> ")
+      - after an error, shows `reprompt` (default: " > ")
       - always prints errors (either via error_printer or a default formatter)
       - supports help/quit via check_user_input
 
@@ -285,12 +360,12 @@ def prompt_menu_choice(
     *,
     help_cb: Optional[Callable[[], None]] = None,
     error_printer: Optional[Callable[[StardateCLIError], None]] = None,
-    reprompt: str = "> ",
+    reprompt: str = " > ",
     code: str = "E009",
-    msg: str = "Invalid selection."
+    msg: str = "Invalid selection. Please select 1 or 2."
 ) -> str:
     """
-    Menu choice prompt with Othello-style minimal reprompting.
+    Menu choice prompt with minimal reprompting
     """
     first = True
     while True:
@@ -319,11 +394,8 @@ def prompt_yes_no(
     *,
     help_cb: Optional[Callable[[], None]] = None,
     error_printer: Optional[Callable[[StardateCLIError], None]] = None,
-    reprompt: str = "> ",
+    reprompt: str = " > ",
 ) -> bool:
-    """
-    Yes/No prompt with Othello-style minimal reprompting.
-    """
     first = True
     while True:
         try:

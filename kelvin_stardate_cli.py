@@ -17,10 +17,12 @@ from kelvin_cli_input import (
     ContinuePrompt,
     check_user_input,
     parse_year,
+    parse_year_yyyy,
     parse_month,
     parse_day,
     parse_earth_date,
     validate_stardate_string,
+    validate_kelvin_stardate_string,
     prompt_until_valid,
     prompt_menu_choice,
     prompt_yes_no,
@@ -40,7 +42,6 @@ RESULT_WIDTH = 62
 # MODE NORMALIZER
 # ============================================================
 
-#def normalize_mode(mode: str):
 def normalize_mode(mode):
     mode = mode.lower().strip()
     if mode in ("1", "no_leap", "noleap", "nl", "canon", "ordinal"):
@@ -169,7 +170,7 @@ def do_stardate_to_earth(sd_str, mode):
             dt_nl = stardate_to_earth(sd_str, "no_leap")
             print(f"   {c('no_leap')}Kelvin (no_leap){reset()}    :  "
                   f"{dt_nl}  ({dt_nl.strftime('%B %d, %Y')})")
-        except (StardateError, ValueError):
+        except (StardateError, ValueError, OverflowError):
             print(f"   {c('error')}Kelvin (no_leap): ERROR{reset()}")
 
         # gregorian
@@ -177,7 +178,7 @@ def do_stardate_to_earth(sd_str, mode):
             dt_gr = stardate_to_earth(sd_str, "gregorian")
             print(f"   {c('gregorian')}Kelvin (gregorian){reset()}  :  "
                   f"{dt_gr}  ({dt_gr.strftime('%B %d, %Y')})")
-        except (StardateError, ValueError):
+        except (StardateError, ValueError, OverflowError):
             print(f"   {c('error')}Kelvin (gregorian): ERROR{reset()}")
 
         # astronomical
@@ -185,7 +186,7 @@ def do_stardate_to_earth(sd_str, mode):
             dt_astr = stardate_to_earth_astronomical(float(sd_str))
             print(f"   {c('astronomical')}Astronomical{reset()}        :  "
                   f"{dt_astr}  ({dt_astr.strftime('%B %d, %Y')})")
-        except (ValueError, StardateError, StardateCLIError):
+        except (ValueError, StardateError, StardateCLIError, OverflowError):
             print(f"   {c('error')}Astronomical: ERROR{reset()}")
 
         print(f" {border}\n")
@@ -193,12 +194,21 @@ def do_stardate_to_earth(sd_str, mode):
 
     # --- SINGLE MODE ---
     auto = detect_stardate_type(sd_str)
-    if mode == "astronomical" or auto == "astronomical":
-        dt = stardate_to_earth_astronomical(float(sd_str))
-        print_single_result("astronomical", earth_date=dt, input_sd=sd_str)
-    else:
-        dt = stardate_to_earth(sd_str, mode)
-        print_single_result(mode, earth_date=dt, input_sd=sd_str)
+
+    try:
+        if mode == "astronomical" or auto == "astronomical":
+            dt = stardate_to_earth_astronomical(float(sd_str))
+            print_single_result("astronomical", earth_date=dt, input_sd=sd_str)
+        else:
+            dt = stardate_to_earth(sd_str, mode)
+            print_single_result(mode, earth_date=dt, input_sd=sd_str)
+
+    except OverflowError:
+        raise StardateCLIError(
+            "E011",
+            f"Stardate '{sd_str}' is out of supported range (year must be 0001–9999)."
+        )
+
 
 
 # ============================================================
@@ -279,20 +289,20 @@ def build_arg_parser():
 def interactive_menu():
 
     def print_cli_error(e: StardateCLIError):
-        print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}\n")
+        print(f"{c('error')}Error [{e.code}]: {e.msg}{reset()}")
 
     print()
     print("╔══════════════════════════════════════════════════════════╗")
     print("║        KELVIN TIMELINE STARDATE CONVERTER (v1.5)         ║")
     print("║        Based on Roberto Orci’s ordinal-date system       ║")
     print("║        Type 'h' for help – 'q' to quit                   ║")
-    print("╚══════════════════════════════════════════════════════════╝\n")
+    print("╚══════════════════════════════════════════════════════════╝")
 
     while True:
         # --------------------------------------------
         # Choose conversion direction
         # --------------------------------------------
-        print(" Conversion Modes:")
+        print("\n Conversion Modes:")
         print("   1) Earth → Stardate")
         print("   2) Stardate → Earth")
         print("------------------------------------------------------------")
@@ -314,7 +324,7 @@ def interactive_menu():
         print(f"   4) {c('all')}all{reset()}           (display all modes)")
         print("------------------------------------------------------------")
 
-        # We need to allow empty input here for default selection.
+        # Allows empty input here for default selection.
         # prompt_until_valid() currently disallows empty via check_user_input.
         while True:
             try:
@@ -347,7 +357,7 @@ def interactive_menu():
                 print(" Enter Earth date components:")
                 y = prompt_until_valid(
                     "   Year  (YYYY): ",
-                    parse_year,
+                    parse_year_yyyy,
                     help_cb=help_loop,
                     error_printer=print_cli_error,
                 )
@@ -368,9 +378,15 @@ def interactive_menu():
 
             else:
                 # Stardate -> Earth
+                if mode in ("astronomical"):
+                    validator = validate_stardate_string
+                else:
+                    validator = validate_kelvin_stardate_string
+
+
                 sd = prompt_until_valid(
                     " Enter stardate (e.g., 2258.042): ",
-                    validate_stardate_string,
+                    validator,
                     help_cb=help_loop,
                     error_printer=print_cli_error,
                 )

@@ -152,7 +152,7 @@ def stardate_to_earth(sd: Union[KelvinStardate, str, float],
     else:
         raise StardateError(f"Unknown leap_mode: {leap_mode}")
 
-    return date(year, 1, 1) + timedelta(days=real_ordinal - 1)
+    return date(year, 1, 1) + timedelta(days = real_ordinal - 1)
 
 
 def stardate_to_earth_astronomical(sd: float) -> date:
@@ -166,4 +166,4 @@ def stardate_to_earth_astronomical(sd: float) -> date:
     if doy < 1:
         doy = 1
 
-    return date(year, 1, 1) + timedelta(days=doy - 1)
+    return date(year, 1, 1) + timedelta(days = doy - 1)
