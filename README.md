@@ -2,21 +2,21 @@
 
 *(CLI + Library, Multiple Timelines, Mild Exhaustion)*
 
-This is a **Kelvin Timeline–compatible stardate ⟷ Earth date converter**, written in Python, with both:
+This is a **Kelvin Timeline–compatible stardate ⟷ Earth date converter**, written in Python, providing both:
 
-- a **fully interactive terminal interface**, and  
-- a **scriptable CLI / importable library**  
+- a **fully interactive command-line interface**, and  
+- a **clean, importable Python library**  
 
 It exists because:
 
-1. Stardates are fake,
-2. Some people pretend they aren’t,
-3. I got tired of hand-waving calendar math across timelines, and
-4. Nobody else open-sourced one that does the canonical conversion for the reboot movies.
+1. Stardates are fake,  
+2. Some people pretend they aren’t,  
+3. Star Trek (2009–2016) made calendar math everyone’s problem, and  
+4. Nobody else open-sourced a converter that actually matches the reboot-era assumptions.
 
 Also because I kept needing it.
 
-This project is *far more complicated than it strictly needed to be*, and that is on purpose.
+This project is **more complicated than strictly necessary**, and that is intentional.
 
 ---
 
@@ -45,152 +45,64 @@ The CLI color-codes output by mode so you can tell which timeline you’re in wi
 ## Requirements
 
 - **Python 3.9+**
-- `pip` (installed and not ancient)
+- `pip`
+- A terminal (PowerShell or Command Prompt on Windows)
 
-Install dependencies with:
-
-```bash
-pip install -r requirements.txt
-````
-
-New to Python or the command line? See [`SETUP_FOR_DUMMIES.md`](./SETUP_FOR_DUMMIES.md)
-
-### Python Dependencies
-
-Dependencies are intentionally minimal and explicit:
-
-| Package    | Purpose                                                                      |
-| ---------- | ---------------------------------------------------------------------------- |
-| `colorama` | Cross-platform terminal colors (especially required on Windows / PowerShell) |
-| `pytest`   | Required to run `test_kelvin_stardate.py`                                    |
-| `PyYAML`   | Planned future functionality (configuration / structured data support)       |
-
-Only `colorama` is required to *run the CLI*.
-`pytest` is only needed if you are running tests.
+If you just want it to work and do not enjoy tooling:
+👉 see [`SETUP_FOR_DUMMIES.md`](./SETUP_FOR_DUMMIES.md)
 
 ---
 
-## Environment & System Information
+## Installation (Recommended)
 
-This project was developed and tested in a very specific environment.
-Other setups *should* work, but this is what I was working with:
+This project uses modern Python packaging (`pyproject.toml`) and should be installed inside a **virtual environment**.
 
-### Tested Environment
-
-- **Operating System:** Microsoft Windows 11 Pro
-  Version 10.0.26100 (Build 26100)
-- **Python:** CPython 3.13.9
-- **pip:** 25.2
-- **Architecture:** 64-bit (AMD64)
-- **Terminal:** PowerShell / Windows Terminal (dark mode)
-- **Locale:** en_US (cp1252)
-- **stdout encoding:** UTF-8
-
-CLI output (colors, spacing, box characters) was tuned for PowerShell and Windows Terminal.
-If your terminal ignores ANSI colors, output will still work, but will be less readable.
-
-### Python Version Notes
-
-- Developed and tested on **Python 3.13.9** (originally 3.9+ when I was still on the Windows store download)
-- Uses only standard library features and widely supported packages
-- Python ≥ 3.9 is required
-- Not tested on PyPy
-- Not tested on Python < 3.9
-
-If this fails on older Python versions, that is not a bug — upgrade Python.
-
-### pip Notes
-
-You should have `pip` installed and reasonably up to date.
-
-Recommended sanity check:
+From the project root, with a venv activated:
 
 ```bash
-python -m pip install --upgrade pip
+pip install -e .
 ```
 
-If `pip` is missing, install Python properly from
-[https://www.python.org/downloads/](https://www.python.org/downloads/)
+This:
 
-Do not attempt to duct-tape this with system Python from 2014.
+* installs runtime dependencies
+* registers the `kelvin-stardate` command
+* keeps the source editable
 
 ---
 
 ## Running the CLI
 
-You have three ways to use this, depending on how awake you are.
+Once installed, run:
+
+```bash
+kelvin-stardate
+```
+
+This launches the **interactive menu**, which supports:
+
+* mode selection
+* month name parsing (yes, “September” works)
+* leap-year validation
+* explicit error codes
+* polite exits
+* a banner that implies too much timeline awareness
+
+This is the **default and recommended** way to use the tool.
 
 ---
 
-### 1. Interactive Mode (Default)
+## CLI Behavior (On Purpose)
 
-Just run:
-
-```bash
-python kelvin_stardate_cli.py
-```
-
-You’ll get a menu-driven interface with:
-
-- mode selection
-- month name parsing (yes, you can type “September”)
-- leap-year validation
-- error codes
-- polite exits
-- and a banner that quietly implies too much lore knowledge
-
-This is the “I just want an answer” mode.
-
----
-
-### 2. Subcommands (Script-Friendly)
-
-Earth → Stardate:
-
-```bash
-python kelvin_stardate_cli.py earth-to 2258 4 17 --mode gregorian
-```
-
-Stardate → Earth:
-
-```bash
-python kelvin_stardate_cli.py sd-to 2258.42 --mode astronomical
-```
-
-If you don’t specify a mode, it defaults to `no_leap`.
-*(And all mode flags do have pseudonyms. Because I'd rather type `a` or `astro` rather than `astronomical`, wouldn't you? Use -h for more info)*
-
----
-
-### 3. Flags (Minimal Typing)
-
-Earth date → Stardate:
-
-```bash
-python kelvin_stardate_cli.py --from-earth 2258 04 17 --mode all
-```
-
-Stardate → Earth date:
-
-```bash
-python kelvin_stardate_cli.py --from-sd 2258.42
-```
-
-If you give it *nothing*, it drops you back into interactive mode instead of yelling at you.
-
----
-
-## Output Behavior (On Purpose)
-
-- Inputs are always echoed at the top of results
-- Outputs include both **ISO dates** and **human-readable dates**
-- `all` mode prints a comparison block so you can see exactly how bad the divergence is
-- Errors use **coded messages** (`E001`, `E002`, etc.) because vague failure is worse than explicit failure
+* Inputs are echoed before results
+* Output includes both **ISO dates** and **human-readable dates**
+* `all` mode prints a comparison block so you can see divergence clearly
+* Errors use **coded messages** (`E001`, `E002`, etc.) because vague failure is worse than explicit failure
 
 The CLI also attempts to auto-detect whether a stardate looks:
 
-- Kelvin-style, or
-- Astronomical (long fractional component)
+* Kelvin-style (ordinal), or
+* Astronomical (long fractional component)
 
 This is not magic. It is pattern recognition and vibes.
 
@@ -198,63 +110,64 @@ This is not magic. It is pattern recognition and vibes.
 
 ## Library Usage (If You’re Importing This)
 
-You can also just use the math.
+You can also use the conversion logic directly:
 
 ```python
-from kelvin_stardate import earth_to_stardate, stardate_to_earth
 from datetime import date
+from kelvin_stardate.core import earth_to_stardate, stardate_to_earth
 
-sd = earth_to_stardate(date(2258, 4, 17), mode="no_leap")
-dt = stardate_to_earth("2258.42", mode="gregorian")
+sd = earth_to_stardate(date(2258, 4, 17), leap_mode="no_leap")
+dt = stardate_to_earth("2258.42", leap_mode="gregorian")
 ```
 
-Astronomical versions are explicit:
+Astronomical conversions are explicit:
 
 ```python
 from kelvin_stardate import (
     earth_to_stardate_astronomical,
-    stardate_to_earth_astronomical
+    stardate_to_earth_astronomical,
 )
 ```
 
-They use a continuous-year model and do not pretend leap days are clean.
+They use a continuous-year model and do not pretend leap days are tidy.
 
 ---
 
 ## Running Tests
 
-Tests are written using `pytest`
+Tests use **pytest**.
 
-To run the full test suite:
+From the project root (inside the venv):
 
 ```bash
 pytest
 ```
 
-Running tests requires `pytest` to be installed
-(see `requirements.txt`).
-
 ---
 
-## Project Structure (at present)
+## Project Structure (Current & Public)
 
 ```text
 .
-├── kelvin_stardate.py            # Core conversion logic (the math nobody agrees on)
-├── kelvin_stardate_cli.py        # CLI, interactive menu, argument parsing, output
-├── kelvin_errors.py              # Custom exception + error codes
-├── kelvin_help.py                # Help text & redisplay loop
-├── tests/                        # Test stuff, duh. Don't wanna do that shit by hand
-│   └── test_kelvin_stardate.py
-├── references/
-│   ├── canon_dates.yaml          # might be implemented in future
-│   ├── scripts/                  # movie scripts I used for reference when checking dates
-│   ├── source_notes.md           # might be added later
-│   └── LICENSE
-├── requirements.txt            # Runtime + test dependencies
-├── .gitignore                  # Aggressively preventative
-├── SETUP_FOR_DUMMIES.md 
-├── README.md                   # You are here
+├── src/
+│   └── kelvin_stardate/
+│       ├── core.py              # Conversion logic
+│       ├── validators.py        # Input validation rules
+│       ├── errors.py            # Error codes + exceptions
+│       ├── data/
+│       │   └── canon_confirmed.yaml
+│       └── cli/
+│           ├── main.py          # CLI entrypoint
+│           ├── prompts.py       # Input loops
+│           ├── helptext.py      # Help output
+│           └── colors.py        # Terminal formatting
+│
+├── tools/                       # Developer utilities (not unit tests)
+├── tests/                       # pytest test suite
+├── SETUP_FOR_DUMMIES.md
+├── README.md
+├── pyproject.toml
+├── requirements.txt             # Convenience only
 └── LICENSE
 ```
 
@@ -262,14 +175,13 @@ Running tests requires `pytest` to be installed
 
 ## Design Notes / Why This Is Like This
 
-- Stardates are **not canonically defined**, so pretending there’s One True Formula is dishonest.
-- This tool makes the assumptions explicit and lets you choose.
-- The Kelvin Timeline uses **ordinal thinking**, not Earth calendar purity.
-- Astronomical mode exists because sometimes you want math, not vibes.
-- `all` mode exists because sometimes you want to *see the timeline fracture*.
+* Kelvin Stardates are **not canonically defined**, so pretending there’s One True Formula is dishonest.
+* This tool makes assumptions explicit and lets you choose.
+* The Kelvin Timeline uses **ordinal thinking**, not Earth calendar purity.
+* Astronomical mode exists because sometimes you want math, not vibes.
+* `all` mode exists because sometimes you want to *see the timeline fracture*.
 
-Also:
-Yes, this CLI is more defensive than strictly necessary.
+Yes, the CLI is more defensive than strictly necessary.
 No, I don’t regret that.
 
 ---
@@ -303,25 +215,22 @@ That is intentional.
 
 ## Known Limitations
 
-- This does **not** attempt to reconcile Prime Timeline stardates (sorry, there are already tools for that. Go check one of them!)
-- This does **not** handle BCE dates (...why would you want that anyway? I don't see Jesus walking around on camera, do you?)
-- This will not stop you from creating paradoxes.
-- The universe will not thank you.
+* This does **not** attempt to reconcile Prime Timeline stardates (sorry, there are already tools for that. Go check one of them!)
+* This does **not** handle BCE dates (...why would you want that anyway? I don't see Jesus walking around on camera, do you?)
+* This will not stop you from creating paradoxes.
+* The universe will not thank you.
 
 ---
 
 ## Licensing & Usage Notes
 
-This repository contains **both original code and reference material**, which are licensed differently.
+This repository contains **both original code and reference material**, licensed separately:
 
-- **Code** (all `.py` files, CLI, tests) is licensed under  
-  **Creative Commons Attribution–NonCommercial 4.0 (CC BY-NC 4.0)**  
-  → Non-commercial use only; attribution required.
+* **Code** (all `.py` files, CLI, tests):
+  **Creative Commons Attribution–NonCommercial 4.0 (CC BY-NC 4.0)**
 
-- **Reference material** (everything under `/references`) is licensed under  
-  **Creative Commons Attribution–NonCommercial–ShareAlike 4.0 (CC BY-NC-SA 4.0)**  
-  → Non-commercial use only; attribution required; derivatives must use the same license.  
-  → Reference data may not be redistributed independently of this project.
+* **Reference material** (`/references`):
+  **Creative Commons Attribution–NonCommercial–ShareAlike 4.0 (CC BY-NC-SA 4.0)**
 
 This project is not affiliated with, endorsed by, or claiming authority over
 official Star Trek canon.
@@ -331,10 +240,10 @@ official Star Trek canon.
 ## Final Note
 
 This started as “I just need a quick converter” and became
-“well, *now* it needs modes, error codes, command line flags, and an interactive menu.”
+“well, *now* it needs modes, error codes, packaging, and a real CLI.”
 
-If you’re reading this because you found the repo:
-hello, welcome, I hope this saves you time.
+If you found this repo:
+welcome — I hope it saves you time.
 
-If you’re reading this because you’re me, later:
+If you are Future Me:
 yes, this was the correct amount of effort.

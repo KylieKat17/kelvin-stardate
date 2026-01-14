@@ -294,7 +294,7 @@ def interactive_menu():
 
     print()
     print("╔══════════════════════════════════════════════════════════╗")
-    print("║        KELVIN TIMELINE STARDATE CONVERTER (v1.5)         ║")
+    print("║        KELVIN TIMELINE STARDATE CONVERTER (v1.6)         ║")
     print("║        Based on Roberto Orci’s ordinal-date system       ║")
     print("║        Type 'h' for help – 'q' to quit                   ║")
     print("╚══════════════════════════════════════════════════════════╝")

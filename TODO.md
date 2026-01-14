@@ -156,16 +156,7 @@ All of it is allowed to exist here without judgment (because fuck you I didn't p
 
 MORE.
 
-- make 
-def prompt_mode(help_cb, error_printer):
-    while True:
-        raw = input(" Choose mode [default=1]: ")
-        if raw.strip() == "":
-            return "no_leap"
-        try:
-            check_user_input(raw, help_cb=help_cb)
-            return normalize_mode(raw)
-        except ContinuePrompt:
-            continue
-        except StardateCLIError as e:
-            error_printer(e)
+- move validators to validators.py
+- update README roadmap
+- update CHANGELOG for 1.4, 1.5, and 1.6
+- add a file about dev details and dev stuff
