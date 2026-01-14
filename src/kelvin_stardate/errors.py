@@ -1,18 +1,27 @@
-# errors.py
-# kelvin_errors.py (v1.5-)
+# src/kelvin_stardate/errors.py
+# (formerly kelvin_errors.py v1.5-)
 
 """
-Error handling and error-code registry for the Kelvin stardate CLI.
+Error handling and error-code registry for the Kelvin stardate tool.
 
 Provides:
   - ErrorInfo: structured metadata for each error code.
   - ERROR_REGISTRY: mapping from code -> ErrorInfo.
-  - StardateCLIError: main exception type for CLI-level errors.
+  - StardateError: base exception type for library-level errors.
+  - StardateCLIError: exception type for CLI-level, coded errors.
   - helper functions to format errors for CLI and help screens.
 """
 
 from dataclasses import dataclass
 from typing import Dict, Optional
+
+
+# ============================================================
+# Base error types
+# ============================================================
+
+class StardateError(Exception):
+    """Base exception for the Kelvin stardate library/tool."""
 
 
 @dataclass
@@ -23,20 +32,8 @@ class ErrorInfo:
     dev: Optional[str]  # optional dev notes for debugging / internals
 
 
-# TODO:
-# -- Reorder error codes in REGISTRY view so empty/null-style errors appear first
-#    when listing, even if their code numbers are larger.
-# -- The CLI currently hard-codes some codes (e.g. "E007" for empty input).
-#    Once things stabilize, we can refactor to a more declarative mapping
-#    between situations and codes.
-# -- Add a dev-mode flag in the CLI to show `dev` messages in addition to `long`
-#    when printing or logging errors.
-
-
 # ============================================================
-# RENAMBERED ERROR CODES
-# E001 is now EMPTY INPUT (formerly E007)
-# Everything else shifts down by 1 in numbering, but retains meaning
+# ERROR REGISTRY
 # ============================================================
 
 ERROR_REGISTRY: Dict[str, ErrorInfo] = {
@@ -156,10 +153,14 @@ ERROR_REGISTRY: Dict[str, ErrorInfo] = {
 
 
 # ============================================================
-# Exception + helper functions (unchanged)
+# CLI-level coded exception + helper functions
 # ============================================================
 
-class StardateCLIError(Exception):
+class StardateCLIError(StardateError):
+    """
+    CLI-focused error that carries an error code + registry metadata.
+    Inherits StardateError so callers can catch either broad or specific errors.
+    """
     def __init__(self, code: str, msg: Optional[str] = None):
         self.code = code
         self.info = ERROR_REGISTRY.get(code)
@@ -215,7 +216,7 @@ def list_error_codes_ordered():
         if code in ERROR_REGISTRY:
             ordered.append(ERROR_REGISTRY[code])
 
-    # fallback: include anything not in preferred_order
+    # fallback: includes anything not in preferred_order
     for code in ERROR_REGISTRY:
         if code not in preferred_order:
             ordered.append(ERROR_REGISTRY[code])

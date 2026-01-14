@@ -4,7 +4,7 @@
 from datetime import date
 import pytest
 
-from kelvin_stardate.core import (
+from kelvin_stardate.core import ( # type: ignore
     earth_to_stardate,
     stardate_to_earth,
     earth_to_stardate_astronomical,

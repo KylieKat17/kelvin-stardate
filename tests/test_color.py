@@ -1,4 +1,6 @@
-from kelvin_stardate.cli.colors import COLORS, reset
+# tests/test_color.py
+
+from kelvin_stardate.cli.colors import COLORS, reset # type: ignore
 
 print("\n=== Kelvin Color Palette Test ===\n")
 
