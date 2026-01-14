@@ -1,4 +1,5 @@
-# kelvin_help.py
+# helptext.py 
+# kelvin_help.py (v1.5-)
 
 """
 Rich, interactive help system for the Kelvin Timeline Stardate converter.
@@ -11,14 +12,14 @@ Provides:
 This module is intentionally CLI-focused: no conversion logic lives here.
 """
 
-from kelvin_errors import (
+from src.kelvin_stardate.errors import (
     list_error_codes_ordered,
     format_error_for_help,
     StardateCLIError,
 )
 
 # Initialize color support
-from kelvin_colors import c, reset
+from src.kelvin_stardate.cli.colors import c, reset
 
 
 class ContinuePrompt(Exception):

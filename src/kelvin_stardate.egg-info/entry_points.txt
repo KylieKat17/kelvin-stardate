@@ -1,0 +1,2 @@
+[console_scripts]
+kelvin-stardate = kelvin_stardate.cli.main:main

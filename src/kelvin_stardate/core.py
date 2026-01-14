@@ -1,4 +1,5 @@
-# kelvin_stardate.py
+# core.py
+# kelvin_stardate.py (v1.5-)
 
 from __future__ import annotations
 from dataclasses import dataclass

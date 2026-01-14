@@ -1,6 +1,7 @@
-"""
-kelvin_colors.py
+# colors.py
+# kelvin_colors.py (v1.5-)
 
+"""
 Centralized color and style definitions for the Kelvin Stardate Converter.
 """
 

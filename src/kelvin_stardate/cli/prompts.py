@@ -1,4 +1,6 @@
-# kelvin_cli_input.py
+# prompts.py
+# kelvin_cli_input.py (v1.5-)
+
 """
 CLI-only input utilities for kelvin_stardate_cli.py
 
@@ -14,8 +16,8 @@ from __future__ import annotations
 
 from typing import Callable, Optional, Tuple, TypeVar
 
-from kelvin_errors import StardateCLIError
-from kelvin_colors import c, reset
+from src.kelvin_stardate.errors import StardateCLIError
+from src.kelvin_stardate.cli.colors import c, reset
 
 T = TypeVar("T")
 

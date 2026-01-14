@@ -1,4 +1,5 @@
-# kelvin_errors.py
+# errors.py
+# kelvin_errors.py (v1.5-)
 
 """
 Error handling and error-code registry for the Kelvin stardate CLI.

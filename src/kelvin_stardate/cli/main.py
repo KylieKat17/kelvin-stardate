@@ -1,11 +1,12 @@
-# kelvin_stardate_cli.py
+# main.py
+# kelvin_stardate_cli.py (v1.5-)
 
 import argparse
 from datetime import date
 
 from colorama import init as colorama_init
 
-from kelvin_stardate import (
+from src.kelvin_stardate.core import (
     earth_to_stardate,
     stardate_to_earth,
     earth_to_stardate_astronomical,
@@ -13,7 +14,7 @@ from kelvin_stardate import (
     is_leap_year,
     StardateError,
 )
-from kelvin_cli_input import (
+from src.kelvin_stardate.cli.prompts import (
     ContinuePrompt,
     check_user_input,
     parse_year,
@@ -27,9 +28,9 @@ from kelvin_cli_input import (
     prompt_menu_choice,
     prompt_yes_no,
 )
-from kelvin_errors import StardateCLIError
-from kelvin_help import help_loop
-from kelvin_colors import COLORS, c, reset
+from src.kelvin_stardate.errors import StardateCLIError
+from src.kelvin_stardate.cli.helptext import help_loop
+from src.kelvin_stardate.cli.colors import COLORS, c, reset
 
 
 # For header output width

@@ -1,8 +1,10 @@
-# test_kelvin_stardate.py
+# tests/test_core.py
+# test_kelvin_stardate.py (v1.5-)
 
 from datetime import date
+import pytest
 
-from kelvin_stardate import (
+from kelvin_stardate.core import (
     earth_to_stardate,
     stardate_to_earth,
     earth_to_stardate_astronomical,
@@ -96,6 +98,7 @@ def test_parse_and_format_padding():
     assert sd.ordinal_day == 4
     assert str(sd) == "2258.04"
 
+
 # --- Astronomical Mode tests ---
 
 def test_astronomical_forward_backward_basic():
@@ -126,8 +129,5 @@ def test_astronomical_leap_year_has_no_offset():
 
 def test_astronomical_requires_float_stardate_input():
     # Ensure ordinal stardates are rejected in astronomical mode
-    try:
+    with pytest.raises(Exception):
         stardate_to_earth("2258.42", leap_mode="astronomical")
-        assert False  # Should not reach
-    except Exception:
-        assert True
