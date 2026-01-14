@@ -34,7 +34,7 @@ desktop.ini          # also Windows, also unnecessary
 # 🐍 Python Bytecode & Runtime Debris
 # ===========================
 __pycache__/         # Python’s memory echoes
-*.py[codz]            # compiled bytecode — discarded between timelines
+*.py[codz]           # compiled bytecode — discarded between timelines
 *.pyo
 *.pyd
 *.pyc
