@@ -1,4 +1,5 @@
-# tests/test_color.py
+# color_preview_kelvin.py
+# Manual visual test for CLI color rendering against black PowerShell background
 
 from kelvin_stardate.cli.colors import COLORS, reset # type: ignore
 
