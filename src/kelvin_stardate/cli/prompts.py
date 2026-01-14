@@ -16,8 +16,8 @@ from __future__ import annotations
 
 from typing import Callable, Optional, Tuple, TypeVar
 
-from src.kelvin_stardate.errors import StardateCLIError
-from src.kelvin_stardate.cli.colors import c, reset
+from ..errors import StardateCLIError
+from ..cli.colors import c, reset
 
 T = TypeVar("T")
 

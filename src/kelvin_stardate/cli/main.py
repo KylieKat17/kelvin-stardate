@@ -6,7 +6,7 @@ from datetime import date
 
 from colorama import init as colorama_init
 
-from src.kelvin_stardate.core import (
+from ..core import (
     earth_to_stardate,
     stardate_to_earth,
     earth_to_stardate_astronomical,
@@ -14,7 +14,7 @@ from src.kelvin_stardate.core import (
     is_leap_year,
     StardateError,
 )
-from src.kelvin_stardate.cli.prompts import (
+from ..cli.prompts import (
     ContinuePrompt,
     check_user_input,
     parse_year,
@@ -28,9 +28,9 @@ from src.kelvin_stardate.cli.prompts import (
     prompt_menu_choice,
     prompt_yes_no,
 )
-from src.kelvin_stardate.errors import StardateCLIError
-from src.kelvin_stardate.cli.helptext import help_loop
-from src.kelvin_stardate.cli.colors import COLORS, c, reset
+from ..errors import StardateError, StardateCLIError
+from ..cli.helptext import help_loop
+from ..cli.colors import COLORS, c, reset
 
 
 # For header output width

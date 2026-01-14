@@ -12,14 +12,15 @@ Provides:
 This module is intentionally CLI-focused: no conversion logic lives here.
 """
 
-from src.kelvin_stardate.errors import (
+from ..errors import (
     list_error_codes_ordered,
     format_error_for_help,
+    StardateError,
     StardateCLIError,
 )
 
 # Initialize color support
-from src.kelvin_stardate.cli.colors import c, reset
+from ..cli.colors import c, reset
 
 
 class ContinuePrompt(Exception):
