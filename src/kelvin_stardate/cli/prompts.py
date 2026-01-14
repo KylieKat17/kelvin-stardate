@@ -1,4 +1,4 @@
-# prompts.py
+# src/kelvin_stardate/cli/prompts.py
 # kelvin_cli_input.py (v1.5-)
 
 """

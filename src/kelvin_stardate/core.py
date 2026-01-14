@@ -1,13 +1,11 @@
-# core.py
+# src/kelvin_stardate/core.py
 # kelvin_stardate.py (v1.5-)
 
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Union
-
-class StardateError(Exception):
-    pass
+from .errors import StardateError
 
 
 # ================================
