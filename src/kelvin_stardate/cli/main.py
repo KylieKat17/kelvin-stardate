@@ -1,6 +1,8 @@
 # src/kelvin_stardate/cli/main.py
 # kelvin_stardate_cli.py (v1.5-)
 
+from __future__ import annotations
+
 import argparse
 from datetime import date
 
@@ -12,24 +14,29 @@ from ..core import (
     earth_to_stardate_astronomical,
     stardate_to_earth_astronomical,
     is_leap_year,
-    StardateError,
 )
+
+from ..errors import StardateError, StardateCLIError
+
 from ..cli.prompts import (
     ContinuePrompt,
     check_user_input,
-    parse_year,
+    prompt_until_valid,
+    prompt_menu_choice,
+    prompt_yes_no,
+)
+
+from ..validators import (
     parse_year_yyyy,
     parse_month,
     parse_day,
     parse_earth_date,
     validate_stardate_string,
     validate_kelvin_stardate_string,
-    prompt_until_valid,
-    prompt_menu_choice,
-    prompt_yes_no,
+    #detect_stardate_type,
+    #normalize_mode,  TODO: MOVE LATER
 )
 
-from ..errors import StardateError, StardateCLIError
 from ..cli.helptext import help_loop
 from ..cli.colors import COLORS, c, reset
 
@@ -42,6 +49,7 @@ RESULT_WIDTH = 62
 
 # ============================================================
 # MODE NORMALIZER
+# TODO: MOVE TO validators.py after checking implementation works
 # ============================================================
 
 def normalize_mode(mode):
@@ -59,6 +67,7 @@ def normalize_mode(mode):
 
 # ============================================================
 # AUTO-DETECT STARDATE TYPE (kelvin vs astronomical)
+# TODO: MOVE TO validators.py after checking implementation works
 # ============================================================
 
 def detect_stardate_type(sd: str):
