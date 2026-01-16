@@ -254,6 +254,13 @@ def build_arg_parser():
             "  all           Display results from all modes\n"
         )
     )
+    # FOR ERROR TESTING IN DEV MODE
+    parser.add_argument(
+        "--list-errors",
+        action="store_true",
+        help="Print all registered error codes and exit."
+    )
+
 
     # ------------------------------
     # Subcommands
@@ -432,6 +439,13 @@ def interactive_menu():
 def main():
     parser = build_arg_parser()
     args = parser.parse_args()
+
+    from ..errors import list_error_codes_ordered
+
+    if args.list_errors:
+        for info in list_error_codes_ordered():
+            print(f"{info.code}: {info.short}")
+        return
 
     try:
         # --- Subcommand mode ---
