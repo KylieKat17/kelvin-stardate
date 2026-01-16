@@ -1,10 +1,16 @@
 # test/conftest.py
 # Because I hate the regular verbose terminal display
+# TODO: reorder imports and shit
 
 from collections import defaultdict
 from pathlib import Path
+from _pytest.terminal import TerminalReporter
 
-import pytest
+import pytest # TODO: maybe remove?
+import re
+import shutil
+
+from kelvin_stardate.cli.colors import c, reset
 
 TEST_FILE_DESCRIPTIONS = {
     "test_core.py": "TESTING MAIN CONVERSION LOGIC",
@@ -18,6 +24,12 @@ TEST_FILE_DESCRIPTIONS = {
 # ============================================================
 
 _RESULTS = defaultdict(list)
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+def _visible_len(s: str) -> int:
+    """Length of string ignoring ANSI escape sequences."""
+    return len(_ANSI_RE.sub("", s))
 
 
 # ============================================================
@@ -52,6 +64,18 @@ def pytest_report_teststatus(report, config):
     """
     if config.getoption("--pretty") and report.when == "call":
         return "", "", ""
+
+def pytest_sessionstart(session):
+    """
+    Suppress pytest's per-file progress lines when using --pretty.
+    """
+    config = session.config
+    if not config.getoption("--pretty"):
+        return
+
+    reporter = config.pluginmanager.getplugin("terminalreporter")
+    if reporter:
+        reporter.showfspath = False
 
 
 # ============================================================
@@ -93,6 +117,20 @@ def describe_test_file(path: str) -> str:
 
 
 # ============================================================
+# COLORSSSS
+# ============================================================
+
+def _color_status(status: str) -> str:
+    if status == "PASSED":
+        return f"{c('success')}{status}{reset()}"
+    if status == "FAILED":
+        return f"{c('error')}{status}{reset()}"
+    if status == "SKIPPED":
+        return f"{c('info')}{status}{reset()}"
+    return status
+
+
+# ============================================================
 # CUSTOM KELVIN SUMMARY OUTPUT
 # ============================================================
 
@@ -100,6 +138,8 @@ def pytest_sessionfinish(session, exitstatus):
     """
     Print custom grouped summary at the end (only with --pretty).
     """
+    term_width = shutil.get_terminal_size(fallback=(120, 20)).columns
+
     if not session.config.getoption("--pretty"):
         return
 
@@ -112,7 +152,7 @@ def pytest_sessionfinish(session, exitstatus):
     name_width = max(len(name) for name, _ in all_rows)
     status_width = max(len(status) for _, status in all_rows)
 
-    print("\n\n========== KELVIN TEST SUMMARY ==========\n")
+    print(f"\n{c('header')}========== KELVIN TEST SUMMARY =========={reset()}\n")
 
     completed = 0
 
@@ -120,21 +160,29 @@ def pytest_sessionfinish(session, exitstatus):
     for file_path in sorted(_RESULTS.keys()):
         tests = _RESULTS[file_path]
         header = describe_test_file(file_path)
+        header_line = f"{c('title')}{header}{reset()}"
+        path_line = f"{c('label')}({file_path}){reset()}"
         
-        print(header)
-        print(f"({file_path})")
+        print(header_line)
+        print(path_line)
 
         for name, status in tests:
             completed += 1
             percent = int((completed / total) * 100)
+            
+            pct_plain = f"[{percent:>3}%]"
+            pct_colored = f"{c('percent')}{pct_plain}{reset()}"
 
-            # Right-aligned, fixed-width like pytest: [  3%], [ 53%], [100%]
-            pct_str = f"[{percent:>3}%]"
+            status_colored = _color_status(status)
 
-            print(
-                f"  {name.ljust(name_width)}   "
-                f"{status.ljust(status_width)}   "
-                f"{pct_str}"
-            )
+            # Left side (colored status, but padding computed from plain)
+            left_plain = "  " + name.ljust(name_width) + "   " + status.ljust(status_width)
+            left_colored = "  " + name.ljust(name_width) + "   " + status_colored.ljust(status_width + (_visible_len(status_colored) - len(status)))
+
+            # Right-align percentage to terminal edge (use visible lengths)
+            padding = term_width - _visible_len(left_colored) - _visible_len(pct_colored)
+            padding = max(padding, 1)
+
+            print(left_colored + " " * padding + pct_colored)
 
         print()

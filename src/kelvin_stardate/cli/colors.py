@@ -19,6 +19,8 @@ COLORS = {
     "warning": Fore.LIGHTYELLOW_EX,
     "info": Fore.CYAN,
     "success": Fore.LIGHTGREEN_EX,
+    "failure": Fore.RED,
+    "percent": Fore.LIGHTBLUE_EX,
 
     # Modes / timelines
     "no_leap": Fore.LIGHTBLUE_EX,
@@ -29,6 +31,7 @@ COLORS = {
     # Headers / emphasis
     "header": Fore.WHITE,
     "label": Fore.YELLOW,
+    "title": Fore.LIGHTBLACK_EX
 }
 
 # ============================================================
