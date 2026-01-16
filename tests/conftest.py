@@ -82,6 +82,23 @@ def pytest_sessionstart(session):
 # TEST RESULT COLLECTION
 # ============================================================
 
+def _make_banner(title: str) -> str:
+    """
+    Create a centered banner like:
+      ====== TITLE ======
+    sized to the current terminal width.
+    """
+    width = shutil.get_terminal_size(fallback=(120, 20)).columns
+    title = f" {title.strip()} "
+    if width <= len(title) + 2:
+        # Too narrow: just return the title
+        return title.strip()
+
+    side = (width - len(title)) // 2
+    left = "=" * side
+    right = "=" * (width - len(left) - len(title))
+    return f"{left}{title}{right}"
+
 def pytest_runtest_logreport(report):
     """
     Capture per-test results (call phase only).
@@ -152,7 +169,8 @@ def pytest_sessionfinish(session, exitstatus):
     name_width = max(len(name) for name, _ in all_rows)
     status_width = max(len(status) for _, status in all_rows)
 
-    print(f"\n{c('header')}========== KELVIN TEST SUMMARY =========={reset()}\n")
+    banner = _make_banner("KELVIN TEST SUMMARY")
+    print(f"\n{c('info')}{banner}{reset()}\n")
 
     completed = 0
 
@@ -160,8 +178,8 @@ def pytest_sessionfinish(session, exitstatus):
     for file_path in sorted(_RESULTS.keys()):
         tests = _RESULTS[file_path]
         header = describe_test_file(file_path)
-        header_line = f"{c('title')}{header}{reset()}"
-        path_line = f"{c('label')}({file_path}){reset()}"
+        header_line = f"{c('label')}{header}{reset()}"
+        path_line = f"{c('path')}({file_path}){reset()}"
         
         print(header_line)
         print(path_line)
