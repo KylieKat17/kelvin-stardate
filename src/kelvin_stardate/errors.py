@@ -149,6 +149,123 @@ ERROR_REGISTRY: Dict[str, ErrorInfo] = {
             "integer to a known mode."
         ),
     ),
+    
+        # --------------------------------------------------------
+    # E007 — Invalid year format
+    # --------------------------------------------------------
+    "E007": ErrorInfo(
+        code="E007",
+        short="Invalid year format.",
+        long=(
+            "The year you entered is not valid.\n\n"
+            "Rules:\n"
+            "  • Digits only (no letters or symbols)\n"
+            "  • No decimal points\n"
+            "  • Must be exactly four digits when requested (YYYY)"
+        ),
+        dev=(
+            "Raised by parse_year() or parse_year_yyyy() when the input "
+            "contains non-numeric characters, decimals, or the wrong length."
+        ),
+    ),
+
+    # --------------------------------------------------------
+    # E008 — Year out of supported range
+    # --------------------------------------------------------
+    "E008": ErrorInfo(
+        code="E008",
+        short="Year out of supported range.",
+        long=(
+            "The year you entered is outside the supported range.\n\n"
+            "Valid years must be between 0001 and 9999, inclusive.\n"
+            "This limit is imposed by Python's date system and timeline constraints."
+        ),
+        dev=(
+            "Raised when a parsed year is numeric but outside the 1–9999 range."
+        ),
+    ),
+
+    # --------------------------------------------------------
+    # E009 — Invalid menu selection
+    # --------------------------------------------------------
+    "E009": ErrorInfo(
+        code="E009",
+        short="Invalid menu selection.",
+        long=(
+            "The option you selected is not valid for this menu.\n\n"
+            "Please choose one of the listed options exactly as shown "
+            "(for example: 1 or 2)."
+        ),
+        dev=(
+            "Raised by prompt_menu_choice() when the user input does not match "
+            "any of the allowed menu values."
+        ),
+    ),
+
+    # --------------------------------------------------------
+    # E010 — Invalid yes/no response
+    # --------------------------------------------------------
+    "E010": ErrorInfo(
+        code="E010",
+        short="Invalid yes/no response.",
+        long=(
+            "The program expected a yes-or-no answer.\n\n"
+            "Accepted values:\n"
+            "  • y / yes\n"
+            "  • n / no"
+        ),
+        dev=(
+            "Raised by prompt_yes_no() when input is not recognized as a "
+            "boolean-style response."
+        ),
+    ),
+
+    # --------------------------------------------------------
+    # E011 — Invalid stardate format or value
+    # --------------------------------------------------------
+    "E011": ErrorInfo(
+        code="E011",
+        short="Invalid stardate.",
+        long=(
+            "The stardate you entered is not valid.\n\n"
+            "Kelvin-format stardates must:\n"
+            "  • Contain exactly one decimal point\n"
+            "  • Use a 4-digit year (0001–9999)\n"
+            "  • Use numeric digits only\n"
+            "  • Not resemble an Earth date (no '-')\n\n"
+            "Examples:\n"
+            "  ✓ 2258.042\n"
+            "  ✗ 2258-02-11\n"
+            "  ✗ 2258.4.2"
+        ),
+        dev=(
+            "Raised by validate_stardate_string() or "
+            "validate_kelvin_stardate_string() when structural, numeric, "
+            "or range checks fail."
+        ),
+    ),
+
+    # --------------------------------------------------------
+    # E012 — Invalid Earth date string format
+    # --------------------------------------------------------
+    "E012": ErrorInfo(
+        code="E012",
+        short="Invalid Earth date format.",
+        long=(
+            "The Earth date you entered is not in a recognized format.\n\n"
+            "Accepted formats:\n"
+            "  • YYYY-MM-DD\n"
+            "  • YYYY-mon-DD  (month names or abbreviations)\n\n"
+            "Examples:\n"
+            "  ✓ 2258-02-11\n"
+            "  ✓ 2258-feb-11\n"
+            "  ✗ 2258/02/11"
+        ),
+        dev=(
+            "Raised by parse_earth_date() when the input string does not split "
+            "into exactly three components using '-' as a delimiter."
+        ),
+    ),
 }
 
 
