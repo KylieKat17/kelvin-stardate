@@ -6,8 +6,17 @@ from pathlib import Path
 
 import pytest
 
+
+# ============================================================
+# GLOBAL STATE
+# ============================================================
+
 _RESULTS = defaultdict(list)
 
+
+# ============================================================
+# CUSTOM CLI FLAG
+# ============================================================
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -18,11 +27,36 @@ def pytest_addoption(parser):
     )
 
 
+# ============================================================
+# OUTPUT SUPPRESSION (ONLY WHEN --pretty IS USED)
+# ============================================================
+
+def pytest_configure(config):
+    """
+    Suppress default pytest progress output when using --pretty.
+    """
+    if config.getoption("--pretty"):
+        config.option.verbose = 0
+        config.option.quiet = 1
+
+
+def pytest_report_teststatus(report, config):
+    """
+    Hide per-test progress symbols (dots / percentages).
+    """
+    if config.getoption("--pretty") and report.when == "call":
+        return "", "", ""
+
+
+# ============================================================
+# TEST RESULT COLLECTION
+# ============================================================
+
 def pytest_runtest_logreport(report):
     """
     Capture per-test results (call phase only).
     """
-    # Some plugins/edge cases can send a list; handle it defensively.
+    # Defensive: some plugins can emit lists
     if isinstance(report, list):
         for r in report:
             pytest_runtest_logreport(r)
@@ -31,7 +65,7 @@ def pytest_runtest_logreport(report):
     if report.when != "call":
         return
 
-    file = Path(report.nodeid.split("::")[0]).as_posix()
+    file = report.nodeid.split("::")[0]
     test = report.nodeid.split("::")[1]
 
     if report.failed:
@@ -44,9 +78,13 @@ def pytest_runtest_logreport(report):
     _RESULTS[file].append((test, status))
 
 
+# ============================================================
+# CUSTOM KELVIN SUMMARY OUTPUT
+# ============================================================
+
 def pytest_sessionfinish(session, exitstatus):
     """
-    Print custom summary only if --pretty is enabled.
+    Print custom grouped summary at the end (only with --pretty).
     """
     if not session.config.getoption("--pretty"):
         return
@@ -55,23 +93,25 @@ def pytest_sessionfinish(session, exitstatus):
     if total == 0:
         return
 
-    print("\n\n========== CUSTOM TEST SUMMARY ==========\n")
+    # Global alignment widths
+    all_rows = [(name, status) for tests in _RESULTS.values() for (name, status) in tests]
+    name_width = max(len(name) for name, _ in all_rows)
+    status_width = max(len(status) for _, status in all_rows)
+
+    print("\n========== KELVIN TEST SUMMARY ==========\n")
 
     completed = 0
 
     for file, tests in _RESULTS.items():
         print(file)
 
-        max_name = max(len(name) for name, _ in tests)
-        max_status = max(len(status) for _, status in tests)
-
         for name, status in tests:
             completed += 1
             percent = int((completed / total) * 100)
 
             print(
-                f"  {name.ljust(max_name)}   "
-                f"{status.ljust(max_status)}   "
+                f"  {name.ljust(name_width)}   "
+                f"{status.ljust(status_width)}   "
                 f"{percent:>3}%"
             )
 
