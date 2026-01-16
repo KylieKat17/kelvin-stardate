@@ -1,4 +1,4 @@
-# main.py
+# src/kelvin_stardate/cli/main.py
 # kelvin_stardate_cli.py (v1.5-)
 
 import argparse
@@ -28,6 +28,7 @@ from ..cli.prompts import (
     prompt_menu_choice,
     prompt_yes_no,
 )
+
 from ..errors import StardateError, StardateCLIError
 from ..cli.helptext import help_loop
 from ..cli.colors import COLORS, c, reset
