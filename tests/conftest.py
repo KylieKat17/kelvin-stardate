@@ -6,6 +6,12 @@ from pathlib import Path
 
 import pytest
 
+TEST_FILE_DESCRIPTIONS = {
+    "test_core.py": "TESTING MAIN CONVERSION LOGIC",
+    "test_validators_errors.py": "TESTING VALIDATION & ERROR CODES",
+    "test_prompts_control_errors.py": "TESTING CLI CONTROL FLOW (HELP / QUIT / EMPTY)",
+    "test_error_registry_complete.py": "TESTING FOR UNREGITERED ERROR CODES"
+}
 
 # ============================================================
 # GLOBAL STATE
@@ -78,6 +84,14 @@ def pytest_runtest_logreport(report):
     _RESULTS[file].append((test, status))
 
 
+def describe_test_file(path: str) -> str:
+    name = Path(path).name
+    return TEST_FILE_DESCRIPTIONS.get(
+        name,
+        "TESTING UNSPECIFIED COMPONENT"
+    )
+
+
 # ============================================================
 # CUSTOM KELVIN SUMMARY OUTPUT
 # ============================================================
@@ -93,26 +107,34 @@ def pytest_sessionfinish(session, exitstatus):
     if total == 0:
         return
 
-    # Global alignment widths
+    # Global alignment widths (across all files)
     all_rows = [(name, status) for tests in _RESULTS.values() for (name, status) in tests]
     name_width = max(len(name) for name, _ in all_rows)
     status_width = max(len(status) for _, status in all_rows)
 
-    print("\n========== KELVIN TEST SUMMARY ==========\n")
+    print("\n\n========== KELVIN TEST SUMMARY ==========\n")
 
     completed = 0
 
-    for file, tests in _RESULTS.items():
-        print(file)
+    # Consistent ordering by file path
+    for file_path in sorted(_RESULTS.keys()):
+        tests = _RESULTS[file_path]
+        header = describe_test_file(file_path)
+        
+        print(header)
+        print(f"({file_path})")
 
         for name, status in tests:
             completed += 1
             percent = int((completed / total) * 100)
 
+            # Right-aligned, fixed-width like pytest: [  3%], [ 53%], [100%]
+            pct_str = f"[{percent:>3}%]"
+
             print(
                 f"  {name.ljust(name_width)}   "
                 f"{status.ljust(status_width)}   "
-                f"{percent:>3}%"
+                f"{pct_str}"
             )
 
         print()
