@@ -111,7 +111,7 @@ def show_modes_help():
 
     print(
         f"{c('no_leap')}no_leap{reset()}  "
-        "(aliases: 'noleap', 'nl', '1')\n"
+        "(aliases: 'noleap', 'nl', 'ordinal', '1')\n"
         "  • Uses a 365-day year and ignores leap years entirely.\n"
         "  • This roughly matches Orci's simplified \"day of year\" description,\n"
         "    where every year effectively has days 1..365.\n"
@@ -185,7 +185,7 @@ def show_usage_help():
     print(
         f"{c('success')}1) Interactive mode{reset()}\n"
         "   Run with no arguments:\n"
-        "       python .\\kelvin_stardate_cli.py\n\n"
+        "       kelvin-stardate\n\n"
         "   You'll see a menu:\n"
         "       1) Earth → Stardate\n"
         "       2) Stardate → Earth\n\n"
@@ -199,11 +199,11 @@ def show_usage_help():
     print(
         f"{c('success')}2) Flag-style usage{reset()}\n"
         "   Earth → Stardate:\n"
-        "       python kelvin_stardate_cli.py --from-earth 2258-02-11 --mode all\n\n"
+        "       kelvin-stardate --from-earth 2258-02-11 --mode all\n\n"
         "   Stardate → Earth:\n"
-        "       python kelvin_stardate_cli.py --from-sd 2258.42 --mode greg\n\n"
+        "       kelvin-stardate --from-sd 2258.42 --mode greg\n\n"
         "   Mode strings support full names and abbreviations:\n"
-        "       no_leap, noleap, nl, 1\n"
+        "       no_leap, noleap, nl, ordinal, 1\n"
         "       gregorian, greg, gr, 2\n"
         "       astronomical, astro, astr, 3\n"
         "       all, a, 4\n"
@@ -212,9 +212,9 @@ def show_usage_help():
     print(
         f"{c('success')}3) Subcommands{reset()}\n"
         "   Earth → Stardate:\n"
-        "       python kelvin_stardate_cli.py earth-to 2258 2 11 --mode all\n\n"
+        "       kelvin-stardate earth-to 2258 2 11 --mode all\n\n"
         "   Stardate → Earth:\n"
-        "       python kelvin_stardate_cli.py sd-to 2258.42 --mode gregorian\n\n"
+        "       kelvin-stardate sd-to 2258.42 --mode gregorian\n\n"
         "   Subcommands are useful if you prefer positional arguments or want to\n"
         "   script things more explicitly.\n"
     )
@@ -226,7 +226,7 @@ def show_examples_help():
     print(
         f"{c('success')}Example 1 – Earth → Stardate (ALL modes){reset()}\n"
         "   Input:\n"
-        "       python kelvin_stardate_cli.py earth-to 2258 2 11 --mode all\n\n"
+        "       kelvin-stardate earth-to 2258 2 11 --mode all\n\n"
         "   Output (shape):\n"
         "       ====================== RESULTS (ALL MODES) ======================\n"
         "         Earth date         :  2258-02-11  (February 11, 2258)\n"
@@ -240,7 +240,7 @@ def show_examples_help():
     print(
         f"{c('success')}Example 2 – Stardate → Earth (gregorian){reset()}\n"
         "   Input:\n"
-        "       python kelvin_stardate_cli.py sd-to 2258.42 --mode greg\n\n"
+        "       kelvin-stardate sd-to 2258.42 --mode greg\n\n"
         "   Output (shape):\n"
         "       ====================== RESULT (GREGORIAN) ======================\n"
         "         Stardate     :  2258.42\n"
@@ -251,7 +251,7 @@ def show_examples_help():
     print(
         f"{c('success')}Example 3 – Interactive, with help and quit{reset()}\n"
         "   • Run:\n"
-        "       python kelvin_stardate_cli.py\n"
+        "       kelvin-stardate\n"
         "   • Use 'h' or '/help' at any prompt for this help system.\n"
         "   • Use 'q' or 'quit' at any prompt to exit immediately.\n"
     )
